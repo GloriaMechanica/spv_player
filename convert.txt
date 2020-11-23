@@ -1,0 +1,3 @@
+convert from Qtbuilder *.ui file to python file: 
+
+pyuic5 -x spvplayer.ui -o maingui.py
