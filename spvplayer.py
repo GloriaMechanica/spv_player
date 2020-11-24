@@ -43,7 +43,7 @@ class Ui(QtWidgets.QMainWindow):
         
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        self.serial_con.write("Hello World\n".encode('utf-8'))
+        self.serial_con.write(b'\xCA\xFE\x00\x08\x00\x01\xFF\xFF')
         
     def ButtonRefreshUartClicked (self):
         print("Refresh")       
