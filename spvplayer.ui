@@ -19,7 +19,7 @@
      <rect>
       <x>20</x>
       <y>20</y>
-      <width>351</width>
+      <width>471</width>
       <height>81</height>
      </rect>
     </property>
@@ -62,12 +62,25 @@
       <string>Connect</string>
      </property>
     </widget>
+    <widget class="QLabel" name="UartStatusIndicator">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>40</y>
+       <width>101</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Disconnected</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="buttonTest">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>120</y>
+      <y>260</y>
       <width>89</width>
       <height>25</height>
      </rect>

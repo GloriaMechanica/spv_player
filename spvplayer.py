@@ -8,13 +8,12 @@ Created on Mon Nov 23 18:36:59 2020
 from PyQt5 import QtWidgets, uic
 import PyQt5.QtCore
 import numpy as np
+import threading
 
 
 import sys
 
 import uart_comm
-
-
 
 
 class Ui(QtWidgets.QMainWindow):
@@ -30,11 +29,16 @@ class Ui(QtWidgets.QMainWindow):
         self.isconnected = False
         self.baudrate = 115200
         self.uart_timeout = 10
+        self.outgoing_packet_counter = 0
         self.uart_poll_interval = 1
+        self.uart_timeout_timer = None
+        self.waiting_for_response = 0
         self.serial_con = None
+        
         self.threadpool = PyQt5.QtCore.QThreadPool() 
         self.poller = None
         self.RefreshComPortList()
+        self.SetUartStatusIndicator("disconnected")
         
     def __bindGuiElements (self):
         self.buttonUartRefresh.clicked.connect(self.ButtonRefreshUartClicked)
@@ -43,7 +47,8 @@ class Ui(QtWidgets.QMainWindow):
         
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        self.serial_con.write(b'\xCA\xFE\x00\x08\x00\x01\xFF\xFF')
+        self.UartSendCommand("status", bytearray(b'\x12\x34'))
+
         
     def ButtonRefreshUartClicked (self):
         print("Refresh")       
@@ -58,15 +63,41 @@ class Ui(QtWidgets.QMainWindow):
                 self.StartUartPollingThread(self.serial_con)
                 self.buttonUartConnect.setText("Disconnect")
                 print("Connection to " + str(com_sel) + " successful!")
+                self.SetUartStatusIndicator("pending")
         else:
             self.isconnected = False
             uart_comm.ClosePort(self.serial_con)
             self.StopUartPollingThread()
             self.serial_con=None
             self.buttonUartConnect.setText("Connect")
+            self.SetUartStatusIndicator("disconnected")
      
     def UartReceivedData(self, data):
-        print(data)
+        if self.waiting_for_response == 1:
+            self.uart_timeout_timer.cancel()
+            self.waiting_for_response = 0
+            self.SetUartStatusIndicator("connected")
+        print("Received: ")
+       # print(data)
+        
+       
+    def UartSendCommand(self, command, data): 
+        tempdata = bytearray(b'\xCA\xFE') # UID
+        length = len(data) + 8
+        
+        if command == "status": 
+            cmdbyte = b'\x00'
+        else:
+            cmdbyte = b'\xFF' # invalid
+        tempdata.extend(length.to_bytes(2, "big"))
+        tempdata.extend(self.outgoing_packet_counter.to_bytes(1, "big"))
+        tempdata.extend(cmdbyte)
+        tempdata.extend(data)
+        crcval = uart_comm.crc16(tempdata, len(tempdata))
+        tempdata.extend(crcval.to_bytes(length=2, byteorder='big'))
+        self.StartUartTimeout()
+        self.serial_con.write(tempdata)
+        print("CRC: " + hex(crcval) + " length: " + str(len(data))) 
         
     def RefreshComPortList(self):
         ports_list = uart_comm.GetPorts()
@@ -83,6 +114,28 @@ class Ui(QtWidgets.QMainWindow):
         if not self.poller == None:
             self.poller.exit()
         self.poller = None
+        
+    def UartTimeoutExpire(self): 
+        print("Expected response form SPV not received!")
+        self.SetUartStatusIndicator("pending")
+        
+    def StartUartTimeout(self): 
+        self.waiting_for_response = 1
+        self.uart_timeout_timer = threading.Timer(0.2, self.UartTimeoutExpire)
+        self.uart_timeout_timer.start()
+        
+    def SetUartStatusIndicator(self, status): 
+        if status=="disconnected": 
+            self.UartStatusIndicator.setStyleSheet("background-color: red")
+            self.UartStatusIndicator.setText("Disconnected")
+        elif status=="pending": 
+            self.UartStatusIndicator.setStyleSheet("background-color: yellow")
+            self.UartStatusIndicator.setText("Pending")
+        elif status =="connected": 
+            self.UartStatusIndicator.setStyleSheet("background-color: green")
+            self.UartStatusIndicator.setText("Connected")
+        else:
+            print("unexpected UART status")
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()

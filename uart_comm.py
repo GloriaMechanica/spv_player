@@ -61,6 +61,22 @@ def Readln(con):
         print("Error reading from serial connection!")
     return retstr
 
+# from Stackexchange, slightly modified:
+# https://stackoverflow.com/questions/35205702/calculating-crc16-in-python
+def crc16(data : bytearray, length):
+    if data is None and length > len(data):
+        return 0
+    crc = 0xFFFF
+    for i in range(0, length):
+        crc ^= data[i] << 8
+        for j in range(0,8):
+            if (crc & 0x8000) > 0:
+                crc =(crc << 1) ^ 0x1021
+            else:
+                crc = crc << 1
+    return crc & 0xFFFF
+
+
 
 # signal which is generated when the thread received data
 class WorkerSignals(PyQt5.QtCore.QObject):
@@ -101,25 +117,6 @@ class UartReceiveThread(PyQt5.QtCore.QRunnable):
     def exit(self): 
         self._is_running = False
         
-"""       
-def uart_polling_thread(self, e):
-    ticks = 0
-    
-    # polling the uart input buffer
-    while (self._want_abort==0):
-        ticks = ticks + 1
-        string = Readln(self.serial_con)
-        
-        return  # found result string
-        time.sleep(self.interval)
-    
-    
-        
-
-    def abort(self):
-        self._want_abort = 1
-            
-   """ 
 
 
     
