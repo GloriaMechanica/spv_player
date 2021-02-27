@@ -9,12 +9,30 @@ from PyQt5 import QtWidgets, uic
 import PyQt5.QtCore
 import numpy as np
 import threading
+import struct
 
 
 import sys
 
 import uart_comm
 
+class UartPacketErrors:
+    packetCorrect = 0
+    packetTooShort = 1
+    packetTooLong = 2
+    packetUIDError = 3
+    packetCRCError = 4
+    packetNACK = 5
+
+class Settings: 
+    minimal_packet_length = 8
+    baudrate = 115200
+    uart_timeout = 10
+    responseTimeout = 500 #ms If no response from the SPV is recieved within, its an error
+    uart_poll_interval = 200 # ms: UART checked for new data in this interval 
+    resend_tries = 3 # a command is retried that many times if the SPV responds with a NACK
+    packet_UID = bytes(b'\xCA\xFE')
+    ack = 0
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -26,14 +44,16 @@ class Ui(QtWidgets.QMainWindow):
         self.show()  
     
     def __initialize (self):
+        # Settings
+        self.settings = Settings()
+        print(self.settings.packet_UID)
+
         self.isconnected = False
-        self.baudrate = 115200
-        self.uart_timeout = 10
         self.outgoing_packet_counter = 0
-        self.uart_poll_interval = 1
         self.uart_timeout_timer = None
         self.waiting_for_response = 0
         self.serial_con = None
+        self.resend_counter = 0
         
         self.threadpool = PyQt5.QtCore.QThreadPool() 
         self.poller = None
@@ -47,7 +67,7 @@ class Ui(QtWidgets.QMainWindow):
         
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        self.UartSendCommand("status", bytearray(b'\x12\x34'))
+        self.UartSendCommand("status", bytearray(b'\x12\x34\x56\x78'))
 
         
     def ButtonRefreshUartClicked (self):
@@ -57,10 +77,10 @@ class Ui(QtWidgets.QMainWindow):
     def ButtonUartConnectClicked (self):
         if self.isconnected == False:
             com_sel = self.comboBoxUart.currentText()
-            self.serial_con = uart_comm.OpenPort(com_sel, self.baudrate)
+            self.serial_con = uart_comm.OpenPort(com_sel, self.settings.baudrate)
             if (not(self.serial_con == None)):
                 self.isconnected = True
-                self.StartUartPollingThread(self.serial_con)
+                self.StartUartPollingThread(self.serial_con, self.settings.uart_poll_interval)
                 self.buttonUartConnect.setText("Disconnect")
                 print("Connection to " + str(com_sel) + " successful!")
                 self.SetUartStatusIndicator("pending")
@@ -77,9 +97,43 @@ class Ui(QtWidgets.QMainWindow):
             self.uart_timeout_timer.cancel()
             self.waiting_for_response = 0
             self.SetUartStatusIndicator("connected")
-        print("Received: ")
-       # print(data)
         
+        check = self.UartCheckPacket(data)
+        print("Check result: "+ str(check))
+       # print(data)
+       
+    def UartCheckPacket(self, data): 
+        length = len(data)
+        print("Check packet of length " + str(length))
+        
+        if length < self.settings.minimal_packet_length: 
+            print("Packet smaller minimal length!")
+            return UartPacketErrors.packetTooShort
+        if data[0:2] != self.settings.packet_UID: 
+            print("UID invalid!")
+            return UartPacketErrors.packetUIDError
+        
+        expected_length =  int.from_bytes(data[2:4], 'big') 
+        print("Expected length: " + str(expected_length))
+        if expected_length < length: 
+            print("Real packet length smaller than expected.")
+            return UartPacketErrors.packetTooShort
+        elif expected_length > length: 
+            print("Real packet length bigger than expected.")
+            return UartPacketErrors.packetTooLong
+        # ignore packet counter for now...
+        acknowledge = data[5]
+        if acknowledge != self.settings.ack: 
+            print("SPV sent NACK!")
+            return UartPacketErrors.packetNACK
+        
+        crc_calc = uart_comm.crc16(data, length-2)
+        crc_received = int.from_bytes(data[(length-2):(length)], 'big')
+        if crc_calc != crc_received: 
+            print("CRC of received package flawed!")
+            return UartPacketErrors.packetCRCError
+        
+        return UartPacketErrors.packetCorrect
        
     def UartSendCommand(self, command, data): 
         tempdata = bytearray(b'\xCA\xFE') # UID
@@ -105,8 +159,8 @@ class Ui(QtWidgets.QMainWindow):
         self.comboBoxUart.clear()
         self.comboBoxUart.addItems(ports_list)
     
-    def StartUartPollingThread (self, serial_con): 
-        self.poller = uart_comm.UartReceiveThread(serial_con)
+    def StartUartPollingThread (self, serial_con, response_timeout): 
+        self.poller = uart_comm.UartReceiveThread(serial_con, response_timeout)
         self.poller.signals.received_data.connect(self.UartReceivedData)
         self.threadpool.start(self.poller)
         
@@ -118,10 +172,12 @@ class Ui(QtWidgets.QMainWindow):
     def UartTimeoutExpire(self): 
         print("Expected response form SPV not received!")
         self.SetUartStatusIndicator("pending")
+        self.waiting_for_response = 0
         
     def StartUartTimeout(self): 
+        # Timeout until the response (Ack/Nack) should arrive from the SPV 
         self.waiting_for_response = 1
-        self.uart_timeout_timer = threading.Timer(0.2, self.UartTimeoutExpire)
+        self.uart_timeout_timer = threading.Timer(self.settings.responseTimeout/1e3, self.UartTimeoutExpire)
         self.uart_timeout_timer.start()
         
     def SetUartStatusIndicator(self, status): 

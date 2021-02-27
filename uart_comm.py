@@ -98,10 +98,11 @@ class UartReceiveThread(PyQt5.QtCore.QRunnable):
 
     '''
 
-    def __init__(self, serial_con, *args, **kwargs):
+    def __init__(self, serial_con, poll_interval, *args, **kwargs):
         super(UartReceiveThread, self).__init__()
         self._is_running = True
         self.serial_con = serial_con
+        self.pollInterval = poll_interval
         self.signals = WorkerSignals()
 
     @PyQt5.QtCore.pyqtSlot()
@@ -112,7 +113,7 @@ class UartReceiveThread(PyQt5.QtCore.QRunnable):
             if (bytes_in_buffer > 0):
                 data = self.serial_con.read(size=bytes_in_buffer)
                 self.signals.received_data.emit(data)  # Return the result of the processing
-            time.sleep(0.2)
+            time.sleep(self.pollInterval/1e3)
         
     def exit(self): 
         self._is_running = False
