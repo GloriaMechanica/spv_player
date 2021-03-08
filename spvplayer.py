@@ -24,6 +24,16 @@ class UartPacketErrors:
     packetCRCError = 4
     packetNACK = 5
 
+# in brackets [x,y]: x...number of tag, y...length of data field in tag
+SPVAnswerTags = { 
+    "SoftwareVersion" : [0, 2],
+    "CurrentSystemTime" : [1, 4],
+    "TimeRunning" : [2, 1],
+    "DatapointsMissing" : [3, 2],
+    "ChannelReady" : [4, 1]
+    }
+SPVAnswerTagsLookup = dict(zip(list(np.array(list(SPVAnswerTags.values()))[:,0]), SPVAnswerTags.keys()))
+
 class Settings: 
     minimal_packet_length = 8
     baudrate = 115200
@@ -54,6 +64,8 @@ class Ui(QtWidgets.QMainWindow):
         self.waiting_for_response = 0
         self.serial_con = None
         self.resend_counter = 0
+        self.last_command = None # used to keep the command in case it needs to be resent
+        self.last_data = None # used to keep the data in case it needs to be resent
         
         self.threadpool = PyQt5.QtCore.QThreadPool() 
         self.poller = None
@@ -64,11 +76,19 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonUartRefresh.clicked.connect(self.ButtonRefreshUartClicked)
         self.buttonUartConnect.clicked.connect(self.ButtonUartConnectClicked)
         self.buttonTest.clicked.connect(self.ButtonTestClicked)
+        self.buttonRequestChannelFill.clicked.connect(self.ButtonRequestChannelFillClicked)
+        self.buttonGetStatus.clicked.connect(self.ButtonGetStatusClicked)
         
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        self.UartSendCommand("status", bytearray(b'\x12\x34\x56\x78'))
 
+
+    def ButtonGetStatusClicked(self):
+        self.UartSendCommand("getStatus", None)
+
+    def ButtonRequestChannelFillClicked(self):
+        print("Requesting channel fill")
+        self.UartSendCommand("requestChannelFill", None)
         
     def ButtonRefreshUartClicked (self):
         print("Refresh")       
@@ -93,14 +113,47 @@ class Ui(QtWidgets.QMainWindow):
             self.SetUartStatusIndicator("disconnected")
      
     def UartReceivedData(self, data):
-        if self.waiting_for_response == 1:
+        check = self.UartCheckPacket(data)
+        if self.waiting_for_response == 1 and check == UartPacketErrors.packetCorrect: 
             self.uart_timeout_timer.cancel()
             self.waiting_for_response = 0
             self.SetUartStatusIndicator("connected")
-        
-        check = self.UartCheckPacket(data)
         print("Check result: "+ str(check))
-       # print(data)
+        self.DecodePacket(data)
+        
+    def DecodePacket(self, data): 
+        # The packet is ok, so we can decode its contents.
+        data_length =  int.from_bytes(data[2:4], 'big') - self.settings.minimal_packet_length
+        print("Databytes unpacket: " + str(data_length))
+        
+        result = self.SplitDecodeTLV(data[6:(data_length+6)])
+        print(result)
+        
+    def SplitDecodeTLV(self, data): 
+        total_length = len(data)
+        result = []
+        ptr = 0
+        while (ptr < total_length):
+            cmd = data[ptr]
+            command_string = SPVAnswerTagsLookup[cmd]
+            length = data[ptr+1]
+            datum = data[ptr+2:ptr+2+length]
+            if (command_string == "SoftwareVersion" and length==SPVAnswerTags[command_string][1]):
+                id1 = datum[0]
+                id2 = datum[1]
+                result.append([command_string, id1, id2])
+            elif (command_string == "CurrentSystemTime" and length==SPVAnswerTags[command_string][1]):
+                systime = int.from_bytes(datum, 'little')
+                result.append([command_string, systime])
+            elif (command_string == "TimeRunning" and length==SPVAnswerTags[command_string][1]):
+                running = datum[0]
+                result.append([command_string, running])
+            elif (command_string == "DatapointsMissing" and length==SPVAnswerTags[command_string][1]):
+                channel_nr = datum[0]
+                missing = datum[1]
+                result.append([command_string, channel_nr, missing])
+            ptr = ptr + length + 2
+        return result
        
     def UartCheckPacket(self, data): 
         length = len(data)
@@ -135,23 +188,40 @@ class Ui(QtWidgets.QMainWindow):
         
         return UartPacketErrors.packetCorrect
        
-    def UartSendCommand(self, command, data): 
-        tempdata = bytearray(b'\xCA\xFE') # UID
-        length = len(data) + 8
+    def UartSendCommand(self, command, data):
+        self.resend_counter = 0
+        self.UartTransmitCommand(command, data)
+        self.StartUartTimeout()
         
-        if command == "status": 
+    def UartResendCommand(self): 
+        self.UartTransmitCommand(self.last_command, self.last_data)
+        self.StartUartTimeout()
+
+        
+    def UartTransmitCommand(self, command, data): 
+        tempdata = bytearray(b'\xCA\xFE') # UID
+        if data != None:
+            length = len(data) + 8
+        else:
+            length = 8
+        
+        if command == "getStatus":
             cmdbyte = b'\x00'
+        elif command == "requestChannelFill":
+            cmdbyte = b'\x02'
         else:
             cmdbyte = b'\xFF' # invalid
         tempdata.extend(length.to_bytes(2, "big"))
         tempdata.extend(self.outgoing_packet_counter.to_bytes(1, "big"))
         tempdata.extend(cmdbyte)
-        tempdata.extend(data)
+        if data != None:
+            tempdata.extend(data)
         crcval = uart_comm.crc16(tempdata, len(tempdata))
         tempdata.extend(crcval.to_bytes(length=2, byteorder='big'))
-        self.StartUartTimeout()
         self.serial_con.write(tempdata)
-        print("CRC: " + hex(crcval) + " length: " + str(len(data))) 
+        self.last_command = command # store in case it needs to be resent
+        self.last_data = data
+        print("Send: CRC=" + hex(crcval) + " length=" + str(length))
         
     def RefreshComPortList(self):
         ports_list = uart_comm.GetPorts()
@@ -171,6 +241,12 @@ class Ui(QtWidgets.QMainWindow):
         
     def UartTimeoutExpire(self): 
         print("Expected response form SPV not received!")
+        if self.resend_counter < self.settings.resend_tries: 
+            self.resend_counter = self.resend_counter + 1
+            self.UartResendCommand()
+            print("Resending command.")
+        else:
+            print("Exceeded resend tries!")
         self.SetUartStatusIndicator("pending")
         self.waiting_for_response = 0
         

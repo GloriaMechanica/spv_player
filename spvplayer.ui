@@ -79,14 +79,40 @@
    <widget class="QPushButton" name="buttonTest">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>260</y>
+      <x>20</x>
+      <y>200</y>
       <width>89</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
      <string>Test</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonGetStatus">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>161</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Get Status</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonRequestChannelFill">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>160</y>
+      <width>161</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Request Channel Fill</string>
     </property>
    </widget>
   </widget>
