@@ -13,8 +13,13 @@ import struct
 
 
 import sys
-
 import uart_comm
+import channels
+
+testpositions_xy = [500, 	500, 	1550, 	250, 	2000, 	0, 		100, 		0]
+testtimes_xy = 	  [300, 	400, 	500, 	600, 	500, 	500, 	100, 	100]
+testpositions_z = [1000, 	2000, 	3100, 	500, 	10000, 	0, 		400, 	0,  500]
+testtimes_z = 	  [300, 	400, 	500, 	600, 	1000, 	1000, 	200, 	500, 500]
 
 class UartPacketErrors:
     packetCorrect = 0
@@ -32,6 +37,23 @@ SPVAnswerTags = {
     "DatapointsMissing" : [3, 2],
     "ChannelReady" : [4, 1]
     }
+
+SPVChannelNumbers = {
+    "G_NOTE" : 0,
+    "D_NOTE" : 1,
+    "A_NOTE" : 2,
+    "E_NOTE" : 3,
+    "POSX_DAE" : 4,
+    "POSY_DAE" : 5,
+    "STR_DAE" : 6,
+    "POSX_GDA" : 7,
+    "POSY_GDA" : 8,
+    "STR_GDA" : 9,
+    "G_VIB" : 10,
+    "D_VIB" : 11,
+    "A_VIB" : 12,
+    "E_VIB" : 13
+}
 SPVAnswerTagsLookup = dict(zip(list(np.array(list(SPVAnswerTags.values()))[:,0]), SPVAnswerTags.keys()))
 
 class Settings: 
@@ -58,6 +80,12 @@ class Ui(QtWidgets.QMainWindow):
         self.settings = Settings()
         print(self.settings.packet_UID)
 
+        # Channel buffer structures
+        self.cha_posx_dae = channels.ChannelStructure()
+        self.cha_posy_dae = channels.ChannelStructure()
+        self.cha_str_dae = channels.ChannelStructure()
+        self.AddTestDataToBuffers()
+
         self.isconnected = False
         self.outgoing_packet_counter = 0
         self.uart_timeout_timer = None
@@ -81,7 +109,21 @@ class Ui(QtWidgets.QMainWindow):
         
     def ButtonTestClicked (self): 
         print("Test clicked!")
+        print(self.cha_str_dae.getNextDatapoints(2))
+        print("Advanced time to " + str(self.cha_str_dae.getTimeOfLastExecutedDatapoint()) + "ms")
 
+    def AddTestDataToBuffers(self):
+        block = []
+        for idx, time in enumerate(testtimes_xy):
+            block.append({"timediff": time, "pos": testpositions_xy[idx]})
+        self.cha_posx_dae.appendDatapoints(block)
+        self.cha_posy_dae.appendDatapoints(block)
+
+        block = []
+        for idx, time in enumerate(testtimes_z):
+            block.append({"timediff": time, "pos": testpositions_z[idx]})
+        self.cha_str_dae.appendDatapoints(block)
+        print("Added test data to channels")
 
     def ButtonGetStatusClicked(self):
         self.UartSendCommand("getStatus", None)
@@ -128,7 +170,20 @@ class Ui(QtWidgets.QMainWindow):
         
         result = self.SplitDecodeTLV(data[6:(data_length+6)])
         print(result)
-        
+
+    # This function returns a byte array that can be packed as data to the sendDatapoints command
+    # it takes a list of tags, finds those that are "DatapointsMissing" and prepares the according data points
+    def PrepareChannelDatapoints(self, list_of_missing_points):
+        data = bytearray()
+        for tag in list_of_missing_points:
+            if tag[0] == 'DatapointsMissing':
+                data.extend(tag[1])
+                if tag[1] == SPVChannelNumbers["POSX_DAE"] or tag[1] == SPVChannelNumbers["POSY_DAE"]:
+                    print("Bla1")
+                elif tag[1] == SPVChannelNumbers["STR_DAE"]:
+                    print("Bla2")
+
+
     def SplitDecodeTLV(self, data): 
         total_length = len(data)
         result = []
@@ -209,6 +264,8 @@ class Ui(QtWidgets.QMainWindow):
             cmdbyte = b'\x00'
         elif command == "requestChannelFill":
             cmdbyte = b'\x02'
+        elif command == "sendDatapoints":
+            cmdbyte = b'\x03'
         else:
             cmdbyte = b'\xFF' # invalid
         tempdata.extend(length.to_bytes(2, "big"))
