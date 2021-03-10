@@ -1,9 +1,16 @@
 # The absolute time is only kept internally to the channelstructure
+import settings
+import numpy as np
+
 class ChannelStructure:
-    def __init__(self):
+    def __init__(self, channel_number):
         print("Constructed")
         self.currentChannelTime = -1 # always points at the last element that has been executed.
         self.buffer = [] # buffer contains : [{"timestamp":1234, "timediff":bla, "value 1":456, "value2":789, ...}, {...}]
+        self.number = channel_number
+
+    def getChannelNumber(self):
+        return self.number
 
     def getNextDatapoints(self, number):
         nr = min(number, self.getNumberOfRemainingDatapoints())
@@ -54,6 +61,8 @@ class ChannelStructure:
             new_datapoint.update({"timestamp":(last_absolute_time+datapoint["timediff"])})
             self.buffer.append(new_datapoint)
             last_absolute_time = self.buffer[-1]["timestamp"]
+
+# ---------------------------------------------------------------------
 
 def removekey(d, key):
     r = dict(d)

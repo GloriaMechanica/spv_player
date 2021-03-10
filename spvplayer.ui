@@ -79,8 +79,8 @@
    <widget class="QPushButton" name="buttonTest">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>200</y>
+      <x>30</x>
+      <y>120</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -92,7 +92,7 @@
    <widget class="QPushButton" name="buttonGetStatus">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>140</x>
       <y>120</y>
       <width>161</width>
       <height>25</height>
@@ -105,7 +105,7 @@
    <widget class="QPushButton" name="buttonRequestChannelFill">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>140</x>
       <y>160</y>
       <width>161</width>
       <height>25</height>
@@ -113,6 +113,71 @@
     </property>
     <property name="text">
      <string>Request Channel Fill</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonStartPlaying">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>240</y>
+      <width>161</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Playing</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonStopPlaying">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>280</y>
+      <width>161</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stop Playing</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonInitSPV">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>200</y>
+      <width>161</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Init Channels</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonRewind">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>160</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Rewind</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonClearChannels">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>320</y>
+      <width>161</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear Channels</string>
     </property>
    </widget>
   </widget>
