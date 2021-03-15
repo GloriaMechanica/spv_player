@@ -1,5 +1,14 @@
 import numpy as np
 
+# everything in mm, degrees or steps
+calibration = {"posx_x": -60, "posx_y": 35, "posx_r": 25,
+               "posx_steps_offset":300, "posx_steps_per_degree":10,
+               "posy_x": 60, "posy_y": 45, "posy_r": 35,
+               "poxy_steps_offset":300, "posy_steps_per_degree":10,
+               "roller_r": 5, "nominal_string_radius":38,
+               "str_steps_offset":300, "str_steps_per_mm":50,
+               "posy_steps_per_degree":10}
+
 class Settings:
     minimal_packet_length = 8
     baudrate = 115200

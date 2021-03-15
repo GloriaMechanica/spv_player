@@ -155,7 +155,8 @@ class SPVUartConnection:
             cmdbyte = b'\x03'
         elif command == "startPlaying":
             cmdbyte = b'\x04'
-
+        elif command == "stopPlaying":
+            cmdbyte = b'\x05'
         elif command == "clearChannels":
             cmdbyte = b'\x06'
         else:

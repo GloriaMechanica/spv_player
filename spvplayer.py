@@ -15,6 +15,7 @@ import sys
 import uart_comm
 import channels
 import settings
+import mcode
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -39,6 +40,9 @@ class Ui(QtWidgets.QMainWindow):
         self.cha_str_dae = channels.ChannelStructure(settings.SPVChannelNumbers["STR_DAE"])
         self.AddTestDataToBuffers()
 
+        calibration = []
+        self.mcreader = mcode.McodeReader(calibration)
+
         self.RefreshComPortList()
         self.SetUartStatusIndicator("disconnected")
         
@@ -56,8 +60,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        print(self.cha_str_dae.getNextDatapoints(2))
-        print("Advanced time to " + str(self.cha_str_dae.getTimeOfLastExecutedDatapoint()) + "ms")
+        self.mcreader.parseFile("test.mc")
 
     def ButtonGetStatusClicked(self):
         self.spvcomm.UartSendCommand("getStatus", None)
@@ -101,6 +104,7 @@ class Ui(QtWidgets.QMainWindow):
 
 
     def ButtonStopPlayingClicked(self):
+        self.spvcomm.UartSendCommand("stopPlaying", None)
         print("Stop Playing")
 
     def UartReceiveEvent(self, data):
