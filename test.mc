@@ -23,13 +23,12 @@
 !+$T4 e_note G5
 
 -0 str_dae 150 // Wieder vorwärts
+-0 pos_dae $DOWN $POSE
 !+$T4 e_note A5
-+20 pos_dae -4 $POSE // Hier wird kurz fester angedrückt. 
++80 pos_dae -4 $POSE // Hier wird kurz fester angedrückt.
 +300 pos_dae $DOWN $POSE
 -0 str_dae 50
 !+$T2 e_note B5
 
 -0 str_dae 250 // Hier mehr stroke da es sich um eine längere Note handelt
 !+$T2 e_note B5
-
-$gaga

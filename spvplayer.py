@@ -16,6 +16,7 @@ import uart_comm
 import channels
 import settings
 import mcode
+import machine
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -35,13 +36,28 @@ class Ui(QtWidgets.QMainWindow):
                                                     "error_handler":self.UartErrorOccured})
 
         # Channel buffer structures
-        self.cha_posx_dae = channels.ChannelStructure(settings.SPVChannelNumbers["POSX_DAE"])
-        self.cha_posy_dae = channels.ChannelStructure(settings.SPVChannelNumbers["POSY_DAE"])
-        self.cha_str_dae = channels.ChannelStructure(settings.SPVChannelNumbers["STR_DAE"])
-        self.AddTestDataToBuffers()
+        self.channels = {
+            "g_note" : None,
+            "d_note" : None,
+            "a_note" : None,
+            "e_note" : channels.ChannelStructure(settings.SPVChannelNumbers["e_note"]),
+            "posx_dae" : channels.ChannelStructure(settings.SPVChannelNumbers["posx_dae"]),
+            "posy_dae" :channels.ChannelStructure(settings.SPVChannelNumbers["posy_dae"]),
+            "str_dae" : channels.ChannelStructure(settings.SPVChannelNumbers["str_dae"]),
+            "posx_gda" : None,
+            "posy_gda" : None,
+            "str_gda" : None,
+            "g_vib" : None,
+            "d_vib": None,
+            "a_vib": None,
+            "e_vib" : None,
+        }
 
-        calibration = []
-        self.mcreader = mcode.McodeReader(calibration)
+        #self.AddTestDataToBuffers()
+
+        self.mcreader = mcode.McodeReader(settings.calibration)
+        self.machine = machine.Machine_SPV()
+
 
         self.RefreshComPortList()
         self.SetUartStatusIndicator("disconnected")
@@ -60,7 +76,31 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        self.mcreader.parseFile("test.mc")
+        data = self.mcreader.parseFile("test.mc")
+
+        if data is None:
+            print("Parse error!")
+        else:
+            for d in data:
+                print(d)
+            self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
+
+        print("Status of posx_dae channel")
+        buf = self.channels["posx_dae"].getChannelBuffer()
+        for b in buf:
+            print(b)
+
+        buf = self.channels["posy_dae"].getChannelBuffer()
+        for b in buf:
+            print(b)
+
+        buf = self.channels["str_dae"].getChannelBuffer()
+        for b in buf:
+            print(b)
+
+
+
+
 
     def ButtonGetStatusClicked(self):
         self.spvcomm.UartSendCommand("getStatus", None)
@@ -87,9 +127,9 @@ class Ui(QtWidgets.QMainWindow):
             self.SetUartStatusIndicator("disconnected")
 
     def ButtonRewindClicked(self):
-        self.cha_posx_dae.resetTimeToStart()
-        self.cha_posy_dae.resetTimeToStart()
-        self.cha_str_dae.resetTimeToStart()
+        self.channels["posx_dae"].resetTimeToStart()
+        self.channels["posy_dae"].resetTimeToStart()
+        self.channels["str_dae"].resetTimeToStart()
 
     def ButtonInitSPVClicked(self):
         print("Init not implemented yet!")
@@ -123,12 +163,12 @@ class Ui(QtWidgets.QMainWindow):
         for tag in tags:
             if tag["tag"] == 'DatapointsMissing':
                 channel = None
-                if tag["channel"] == settings.SPVChannelNumbers["POSX_DAE"]:
-                    channel = self.cha_posx_dae
-                elif tag["channel"] == settings.SPVChannelNumbers["POSY_DAE"]:
-                    channel = self.cha_posy_dae
-                elif tag["channel"] == settings.SPVChannelNumbers["STR_DAE"]:
-                    channel = self.cha_str_dae
+                if tag["channel"] == settings.SPVChannelNumbers["posx_dae"]:
+                    channel = self.channels["posx_dae"]
+                elif tag["channel"] == settings.SPVChannelNumbers["posy_dae"]:
+                    channel = self.channels["posy_dae"]
+                elif tag["channel"] == settings.SPVChannelNumbers["str_dae"]:
+                    channel = self.channels["str_dae"]
                 if channel is not None:
                     requested_datapoints = min(budget, tag["missing"])
                     [number, block] = self.spvcomm.PrepareChannelDatapoints(channel, requested_datapoints)
@@ -164,13 +204,13 @@ class Ui(QtWidgets.QMainWindow):
         block = []
         for idx, time in enumerate(settings.testtimes_xy):
             block.append({"timediff": time, "pos": settings.testpositions_xy[idx]})
-        self.cha_posx_dae.appendDatapoints(block)
-        self.cha_posy_dae.appendDatapoints(block)
+        self.channels["posx_dae"].appendDatapoints(block)
+        self.channels["posy_dae"].appendDatapoints(block)
 
         block = []
         for idx, time in enumerate(settings.testtimes_z):
             block.append({"timediff": time, "pos": settings.testpositions_z[idx]})
-        self.cha_str_dae.appendDatapoints(block)
+        self.channels["str_dae"].appendDatapoints(block)
         print("Added test data to channels")
 
 app = QtWidgets.QApplication(sys.argv)

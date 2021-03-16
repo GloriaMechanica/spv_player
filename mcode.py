@@ -1,8 +1,9 @@
 import numpy as np
+import settings
 
 class McodeReader:
     def __init__(self, calibration):
-        self.cal = calibration # holding all calibration for conversion.
+        self.calibration = calibration # holding all calibration for conversion.
 
     def parseFile(self, path):
         file = open(path, "r")
@@ -103,12 +104,53 @@ class McodeReader:
                 buffer.append(line)
         # Commands could
         list_abstime.sort(key=lambda x: x["abstime"])
-
-        for l in list_abstime:
-            print(l)
         return list_abstime
 
     def getLineNumber(self, string_list, string):
         for idx, line in enumerate(string_list):
             if line.find(string)>=0:
                 return idx + 1 # Line numbers start at 1, but python lists at 0
+
+    def pushMcodeDataToChannels(self, data, channels_handle, machine_handle):
+        # Split the data to an individual list containing only points of one axis
+        axis_buffers = []
+        for idx,axis in enumerate(settings.SPVMcodeAxisList.keys()):
+            axis_buffers.append([])
+
+        for d in data:
+            axis_buffers[settings.SPVMcodeAxisList[d["channel"]]].append(d)
+
+        print("Split axis buffers:")
+        for buf in axis_buffers:
+            print(buf)
+
+        for idx,axis in enumerate(axis_buffers):
+            if len(axis) is not 0:
+                last_time = -1000 # TODO: do this properly with init!
+                if idx >= settings.SPVMcodeAxisList["g_note"] and idx <= settings.SPVMcodeAxisList["e_note"]:
+                    for point in axis:
+                        note = machine_handle.convert_note_point(point, self.calibration)
+                        timediff = point["abstime"] - last_time
+                        last_time = point["abstime"]
+                        channels_handle[settings.SPVMcodeAxisListLookup[idx]].appendDatapoints(
+                            [{"timediff": timediff, "note": note}])
+                elif idx == settings.SPVMcodeAxisList["pos_dae"]:
+                    for point in axis:
+                        print(point)
+                        [stepsx, stepsy] = machine_handle.convert_pos_point(point, self.calibration)
+                        timediff = point["abstime"] - last_time
+                        last_time = point["abstime"]
+                        channels_handle["posx_dae"].appendDatapoints(
+                            [{"timediff": timediff, "pos": stepsx}])
+                        channels_handle["posy_dae"].appendDatapoints(
+                            [{"timediff": timediff, "pos": stepsy}])
+                elif idx == settings.SPVMcodeAxisList["str_dae"]:
+                    for point in axis:
+                        steps = machine_handle.convert_str_point(point, self.calibration)
+                        timediff = point["abstime"] - last_time
+                        last_time = point["abstime"]
+                        channels_handle["str_dae"].appendDatapoints(
+                            [{"timediff": timediff, "pos": steps}])
+                    #TODO: Add more axis here
+
+

@@ -2,11 +2,11 @@ import numpy as np
 
 # everything in mm, degrees or steps
 calibration = {"posx_x": -60, "posx_y": 35, "posx_r": 25,
-               "posx_steps_offset":300, "posx_steps_per_degree":10,
+               "posx_steps_offset":600, "posx_steps_per_degree":11,
                "posy_x": 60, "posy_y": 45, "posy_r": 35,
-               "poxy_steps_offset":300, "posy_steps_per_degree":10,
+               "posy_steps_offset":600, "posy_steps_per_degree":11,
                "roller_r": 5, "nominal_string_radius":38,
-               "str_steps_offset":300, "str_steps_per_mm":50,
+               "str_steps_offset": 0, "str_steps_per_mm":13,
                "posy_steps_per_degree":10}
 
 class Settings:
@@ -43,21 +43,78 @@ SPVAnswerTags = {
     "DatapointsMissing" : [3, 2],
     "ChannelReady" : [4, 1]
     }
-
-SPVChannelNumbers = {
-    "G_NOTE" : 0,
-    "D_NOTE" : 1,
-    "A_NOTE" : 2,
-    "E_NOTE" : 3,
-    "POSX_DAE" : 4,
-    "POSY_DAE" : 5,
-    "STR_DAE" : 6,
-    "POSX_GDA" : 7,
-    "POSY_GDA" : 8,
-    "STR_GDA" : 9,
-    "G_VIB" : 10,
-    "D_VIB" : 11,
-    "A_VIB" : 12,
-    "E_VIB" : 13
-}
 SPVAnswerTagsLookup = dict(zip(list(np.array(list(SPVAnswerTags.values()))[:, 0]), SPVAnswerTags.keys()))
+
+# Names and numbers for axis used in M-code. Not the same as the channels on the SPV!
+SPVMcodeAxisList = {"g_note":0, "d_note":1, "a_note":2, "e_note":3, "pos_dae":4, "pos_gda":5,
+                    "str_dae":6, "str_gda":7, "g_vib":8, "d_vib":9, "a_vib":10, "e_vib":11}
+SPVMcodeAxisListLookup = dict(zip(SPVMcodeAxisList.values(), SPVMcodeAxisList.keys()))
+
+# Names and numbers for the channels on the SPV.
+SPVChannelNumbers = {
+    "g_note" : 0,
+    "d_note" : 1,
+    "a_note" : 2,
+    "e_note" : 3,
+    "posx_dae" : 4,
+    "posy_dae" : 5,
+    "str_dae" : 6,
+    "posx_gda" : 7,
+    "posy_gda" : 8,
+    "str_gda" : 9,
+    "g_vib" : 10,
+    "g_vib" : 11,
+    "g_vib" : 12,
+    "g_vib" : 13
+}
+
+
+SPVNoteRange = {
+    "g3" : 55,
+    "g3#" : 56,
+    "a3" : 57,
+    "a3#" : 58,
+    "b3" : 59,
+    "c4" : 60,
+    "c4#" : 61,
+    "d4" : 62,
+    "d4#" : 63,
+    "e4" : 64,
+    "f4" : 65,
+    "f4#" : 66,
+    "g4" : 67,
+    "g4#" : 68,
+    "a4" : 69,
+    "a4#" : 70,
+    "b4" : 71,
+    "c5" : 72,
+    "c5#" : 73,
+    "d5" : 74,
+    "d5#" : 75,
+    "e5" : 76,
+    "f5" : 77,
+    "f5#" : 78,
+    "g5" : 79,
+    "g5#" : 80,
+    "a5" : 81,
+    "a5#" : 82,
+    "b5" : 83,
+    "c6" : 84,
+    "c6#" : 85,
+    "d6": 86,
+    "d6#" : 87,
+    "e6" : 88,
+    "f6" : 89,
+    "f6#" : 90,
+    "g6": 91,
+    "g6#" : 92,
+    "a6" : 93,
+    "g_note_min" : 55,
+    "g_note_max" : 65,
+    "d_note_min" : 62,
+    "d_note_max" : 73,
+    "a_note_min" : 69,
+    "a_note_max" : 80,
+    "e_note_min" : 76,
+    "e_note_max" : 93
+}

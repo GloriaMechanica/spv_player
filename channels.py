@@ -62,6 +62,9 @@ class ChannelStructure:
             self.buffer.append(new_datapoint)
             last_absolute_time = self.buffer[-1]["timestamp"]
 
+    def getChannelBuffer(self):
+        return self.buffer
+
 # ---------------------------------------------------------------------
 
 def removekey(d, key):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
+import settings
 
 
 class Machine_SPV:
@@ -18,7 +19,7 @@ class Machine_SPV:
     
         returns: [alpha_x, alpha_y]: angles in radian
     """
-    def PolarToAngle(Rphi, base):
+    def PolarToAngle(self, Rphi, base):
         x_left = base["posx_x"]
         y_left = base["posx_y"]
         r_left = base["posx_r"]
@@ -81,7 +82,7 @@ class Machine_SPV:
     
         returns: [R, phi]: R in mm, phi in radian
     """
-    def AngleToPolar(angles, base):
+    def AngleToPolar(self, angles, base):
         alpha_l = angles[0]  # angle for posx axis, in degrees
         alpha_r = angles[1]  # angle for posy axis, in degrees
         U_l = np.array([base["posx_x"], base["posx_y"]])  # pivot point of posx axis
@@ -110,10 +111,10 @@ class Machine_SPV:
         return [R, phi]
 
     def convert_str_point(self, input_point, calibration):
-        return int(int(input_point["paramlist"][1])*calibration["str_steps_per_mm"]) + calibration["str_steps_offset"]
+        return int(int(input_point["paramlist"][0])*calibration["str_steps_per_mm"]) + calibration["str_steps_offset"]
 
     def convert_pos_point(self, input_point, calibration):
-        if (input_point["pos_dae"]):
+        if input_point["channel"] == "pos_dae":
             input_radius = int(input_point["paramlist"][0])
             input_angle = int(input_point["paramlist"][1])
             radius = input_radius + calibration["nominal_string_radius"]
@@ -124,14 +125,36 @@ class Machine_SPV:
             else:
                 print("Polar to machine conversion error!")
 
-            steps_x = int(angle_x * calibration["posx_steps_per_degree"]) + calibration["posx_steps_offset"]
-            steps_y = int(angle_y * calibration["posy_steps_per_degree"]) + calibration["posy_steps_offset"]
+            steps_x = int(np.rad2deg(angle_x) * calibration["posx_steps_per_degree"]) + calibration["posx_steps_offset"]
+            steps_y = int(np.rad2deg(-angle_y) * calibration["posy_steps_per_degree"]) + calibration["posy_steps_offset"]
             return [steps_x, steps_y]
         else:
             print("GDA string not supported yet!")
             return None
 
 
+    """
+    convert_note_point():
+        Convert a note specified in input_point in string form (e.g. "C4#")
+         to the right MIDI number. Also perform some limit-checking. 
+         
+         input_point = dictionary with {"channel":(...) and "paramlist:[...]}
+         returns: integer midi note number. (e.g. 61 for C4#)
+    """
     def convert_note_point(self, input_point, calibration):
-        print("bla")
+        param = input_point["paramlist"][0].lower()
+        if param in settings.SPVNoteRange.keys():
+            note = settings.SPVNoteRange[param]
+        else:
+            print("Note is not in range of SPV!")
+            return None
+
+        note_channels = ["g_note", "d_note", "a_note", "e_note"]
+        for nch in note_channels:
+            if input_point["channel"] == nch:
+                if note < settings.SPVNoteRange[nch + "_min"] or note > settings.SPVNoteRange[nch + "_max"]:
+                    print("Note is not in range for " + nch)
+                    return None
+                else:
+                    return note
 
