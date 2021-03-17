@@ -15,6 +15,9 @@ import settings
 import threading
 import traceback, sys
 
+from settings import SPVChannelNumbers
+
+
 class SPVUartConnection:
     def __init__(self, callback):
         self.settings = settings.Settings()
@@ -129,6 +132,15 @@ class SPVUartConnection:
                 data.extend(point["pos"].to_bytes(4, 'little', signed=True))
         return [obtained_number, data]
 
+    def MoveAxisTo(self, channel_descriptor, pos, speed):
+        print("Want to channel axis " + channel_descriptor + " to pos=" + str(pos))
+        data = bytearray()
+        channel_nr = SPVChannelNumbers[channel_descriptor]
+        data.extend(channel_nr.to_bytes(1, "little"))
+        data.extend(pos.to_bytes(2, "little"))
+        data.extend(speed.to_bytes(1, "little"))
+        self.UartSendCommand("moveChannelTo", data)
+
     # This is the command to use when you want to send a command to the SPV
     def UartSendCommand(self, command, data):
         self.resend_counter = 0
@@ -159,6 +171,8 @@ class SPVUartConnection:
             cmdbyte = b'\x05'
         elif command == "clearChannels":
             cmdbyte = b'\x06'
+        elif command == "moveChannelTo":
+            cmdbyte = b'\x09'
         else:
             cmdbyte = b'\xFF'  # invalid
         tempdata.extend(length.to_bytes(2, "big"))

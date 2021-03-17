@@ -73,33 +73,14 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonStartPlaying.clicked.connect(self.ButtonStartPlayingClicked)
         self.buttonStopPlaying.clicked.connect(self.ButtonStopPlayingClicked)
         self.buttonClearChannels.clicked.connect(self.ButtonClearChannelsClicked)
+        self.buttonReadMcode.clicked.connect(self.ButtonReadMcodeClicked)
+        self.buttonMoveENoteTo.clicked.connect(self.ButtonMoveENoteClicked)
+        self.buttonMovePosxTo.clicked.connect(self.ButtonMovePosxClicked)
+        self.buttonMovePosyTo.clicked.connect(self.ButtonMovePosyClicked)
+        self.buttonMoveStrTo.clicked.connect(self.ButtonMoveStrClicked)
 
     def ButtonTestClicked (self): 
         print("Test clicked!")
-        data = self.mcreader.parseFile("test.mc")
-
-        if data is None:
-            print("Parse error!")
-        else:
-            for d in data:
-                print(d)
-            self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
-
-        print("Status of posx_dae channel")
-        buf = self.channels["posx_dae"].getChannelBuffer()
-        for b in buf:
-            print(b)
-
-        buf = self.channels["posy_dae"].getChannelBuffer()
-        for b in buf:
-            print(b)
-
-        buf = self.channels["str_dae"].getChannelBuffer()
-        for b in buf:
-            print(b)
-
-
-
 
 
     def ButtonGetStatusClicked(self):
@@ -142,10 +123,40 @@ class Ui(QtWidgets.QMainWindow):
         self.spvcomm.UartSendCommand("startPlaying", None)
         print("Start Playing")
 
-
     def ButtonStopPlayingClicked(self):
         self.spvcomm.UartSendCommand("stopPlaying", None)
         print("Stop Playing")
+
+    def ButtonReadMcodeClicked(self):
+        data = self.mcreader.parseFile("test.mc")
+        if data is None:
+            print("Parse error!")
+        else:
+            for d in data:
+                print(d)
+            self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
+        print("Status of posx_dae channel")
+        buf = self.channels["posx_dae"].getChannelBuffer()
+        for b in buf:
+            print(b)
+        buf = self.channels["posy_dae"].getChannelBuffer()
+        for b in buf:
+            print(b)
+        buf = self.channels["str_dae"].getChannelBuffer()
+        for b in buf:
+            print(b)
+
+    def ButtonMoveENoteClicked(self):
+        self.spvcomm.MoveAxisTo("e_note", 0, 0)
+
+    def ButtonMovePosxClicked(self):
+        self.spvcomm.MoveAxisTo("posx_dae", int(self.textinPosxPos.text()), 20)
+
+    def ButtonMovePosyClicked(self):
+        self.spvcomm.MoveAxisTo("posy_dae", int(self.textinPosyPos.text()), 20)
+
+    def ButtonMoveStrClicked(self):
+        self.spvcomm.MoveAxisTo("str_dae",  int(self.textinStrPos.text()), 20)
 
     def UartReceiveEvent(self, data):
         print("Something has been received")
