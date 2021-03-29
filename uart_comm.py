@@ -322,7 +322,7 @@ class UartReceiveThread(PyQt5.QtCore.QRunnable):
             if (bytes_in_buffer > 0):
                 data = self.serial_con.read(size=bytes_in_buffer)
                 self.signals.received_data.emit(data)  # Return the result of the processing
-            time.sleep(self.pollInterval/1e3)
+            time.sleep(self.pollInterval/1e3) # can maybe be removed at some point to act more responsive
         
     def exit(self): 
         self._is_running = False
