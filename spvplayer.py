@@ -6,6 +6,7 @@ Created on Mon Nov 23 18:36:59 2020
 @author: josef
 """
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QFileDialog
 import PyQt5.QtCore
 import numpy as np
 import threading
@@ -27,7 +28,10 @@ class Ui(QtWidgets.QMainWindow):
         self.__bindGuiElements()
         self.show()  
     
-    def __initialize (self):
+    def __initialize(self):
+        # M-Code filename
+        self.m_code_file_name = ""  # We will get this via OpenFileDialog
+
         # Settings
         self.settings = settings.Settings()
         print(self.settings.packet_UID)
@@ -61,8 +65,10 @@ class Ui(QtWidgets.QMainWindow):
 
         self.RefreshComPortList()
         self.SetUartStatusIndicator("disconnected")
+        self.MCodeFileName.setStyleSheet("background-color: red")
         
     def __bindGuiElements (self):
+        self.actionOpen.triggered.connect(self.OpenFileDialog)
         self.buttonUartRefresh.clicked.connect(self.ButtonRefreshUartClicked)
         self.buttonUartConnect.clicked.connect(self.ButtonUartConnectClicked)
         self.buttonTest.clicked.connect(self.ButtonTestClicked)
@@ -82,6 +88,17 @@ class Ui(QtWidgets.QMainWindow):
     def ButtonTestClicked (self): 
         print("Test clicked!")
 
+    def OpenFileDialog(self):
+        options = QFileDialog.Options()
+        return_val = QFileDialog.getOpenFileName(self, "Open M-Code File", "",
+                                                  "M-Code Files (*.mc);;All Files (*)", options=options)
+        self.m_code_file_name = return_val[0]
+        self.MCodeFileName.setText(self.m_code_file_name)
+        if self.m_code_file_name:
+            self.MCodeFileName.setStyleSheet("background-color: green")
+        else:
+            self.MCodeFileName.setStyleSheet("background-color: red")
+            self.MCodeFileName.setText("No M-Code File selected")
 
     def ButtonGetStatusClicked(self):
         self.spvcomm.UartSendCommand("getStatus", None)
@@ -128,9 +145,13 @@ class Ui(QtWidgets.QMainWindow):
         print("Stop Playing")
 
     def ButtonReadMcodeClicked(self):
-        data = self.mcreader.parseFile("test.mc")
+
+        if not self.m_code_file_name:
+            print("E: No M-Code File selected, nothing to read!")
+            return
+        data = self.mcreader.parseFile(self.m_code_file_name)
         if data is None:
-            print("Parse error!")
+            print("E: Parse error!")
         else:
             for d in data:
                 print(d)
