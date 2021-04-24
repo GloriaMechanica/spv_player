@@ -15,7 +15,7 @@ class Settings:
     uart_timeout = 10
     spv_receive_buffer_length = 1024
     responseTimeout = 500 #ms If no response from the SPV is recieved within, its an error
-    uart_poll_interval = 200 # ms: UART checked for new data in this interval
+    uart_poll_interval = 10 # ms: UART checked for new data in this interval
     resend_tries = 3 # a command is retried that many times if the SPV responds with a NACK
     packet_UID = bytes(b'\xCA\xFE')
     ack = 0
@@ -41,7 +41,8 @@ SPVAnswerTags = {
     "CurrentSystemTime" : [1, 4],
     "TimeRunning" : [2, 1],
     "DatapointsMissing" : [3, 2],
-    "ChannelReady" : [4, 1]
+    "ChannelReady" : [4, 1],
+    "AxisStatus" : [5, 4]
     }
 SPVAnswerTagsLookup = dict(zip(list(np.array(list(SPVAnswerTags.values()))[:, 0]), SPVAnswerTags.keys()))
 

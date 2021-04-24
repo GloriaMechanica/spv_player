@@ -17,6 +17,7 @@ import channels
 import settings
 import mcode
 import machine
+import maingui
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -78,13 +79,16 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonMovePosxTo.clicked.connect(self.ButtonMovePosxClicked)
         self.buttonMovePosyTo.clicked.connect(self.ButtonMovePosyClicked)
         self.buttonMoveStrTo.clicked.connect(self.ButtonMoveStrClicked)
-
+        self.buttonGetMachineStatus.clicked.connect(self.ButtonGetMachineStatusClicked)
     def ButtonTestClicked (self): 
         print("Test clicked!")
 
 
     def ButtonGetStatusClicked(self):
         self.spvcomm.UartSendCommand("getStatus", None)
+
+    def ButtonGetMachineStatusClicked(self):
+        self.spvcomm.UartSendCommand("getMachineStatus", None)
 
     def ButtonRequestChannelFillClicked(self):
         print("Requesting channel fill")
@@ -165,7 +169,17 @@ class Ui(QtWidgets.QMainWindow):
         print(tags)
 
         self.HandDatapointsToSPV(tags)
+        self.UpdateMachineStatus(tags)
 
+    def UpdateMachineStatus(self, tags):
+        for tag in tags:
+            if tag["tag"] == "AxisStatus":
+                if tag["channel"] == settings.SPVChannelNumbers["posx_dae"]:
+                    self.lblPOSXDAEPos.setText(str(tag["position"]))
+                elif tag["channel"] == settings.SPVChannelNumbers["posy_dae"]:
+                    self.lblPOSYDAEPos.setText(str(tag["position"]))
+                elif tag["channel"] == settings.SPVChannelNumbers["str_dae"]:
+                    self.lblSTRDAEPos.setText(str(tag["position"]))
 
     def HandDatapointsToSPV(self, tags):
         # If any requests for new datapoints are among the tags, we prepare the data now.

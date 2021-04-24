@@ -158,3 +158,4 @@ class Machine_SPV:
                 else:
                     return note
 
+    #TODO: Function that calculates minimal time required to do certain move.

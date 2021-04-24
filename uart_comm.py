@@ -82,6 +82,11 @@ class SPVUartConnection:
                 channel_nr = datum[0]
                 missing = datum[1]
                 result.append({"tag": command_string, "channel":channel_nr, "missing":missing})
+            elif command_string == "AxisStatus" and length == settings.SPVAnswerTags[command_string][1]:
+                channel_nr = datum[0]
+                moving = datum[1]
+                position = int.from_bytes(datum[2:4], 'little')
+                result.append({"tag": command_string, "channel":channel_nr, "moving":moving, "position":position})
             ptr = ptr + length + 2
         return result
 
@@ -161,6 +166,8 @@ class SPVUartConnection:
 
         if command == "getStatus":
             cmdbyte = b'\x00'
+        elif command == "getMachineStatus":
+            cmdbyte = b'\x01'
         elif command == "requestChannelFill":
             cmdbyte = b'\x02'
         elif command == "sendDatapoints":
