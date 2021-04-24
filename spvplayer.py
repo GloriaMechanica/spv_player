@@ -67,6 +67,9 @@ class Ui(QtWidgets.QMainWindow):
         self.RefreshComPortList()
         self.SetUartStatusIndicator("disconnected")
         self.MCodeFileName.setStyleSheet("background-color: red")
+
+        self.AutoMachineUpdateTimer = None
+        self.AutoMachineUpdateRunning = 0
         
     def __bindGuiElements (self):
         self.actionOpen.triggered.connect(self.OpenFileDialog)
@@ -86,8 +89,12 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonMovePosyTo.clicked.connect(self.ButtonMovePosyClicked)
         self.buttonMoveStrTo.clicked.connect(self.ButtonMoveStrClicked)
         self.buttonGetMachineStatus.clicked.connect(self.ButtonGetMachineStatusClicked)
+        self.buttonMachineStatusUpdate.clicked.connect(self.ButtonMachineStatusUpdateClicked)
+
+
     def ButtonTestClicked (self): 
         print("Test clicked!")
+
 
     def OpenFileDialog(self):
         options = QFileDialog.Options()
@@ -101,15 +108,24 @@ class Ui(QtWidgets.QMainWindow):
             self.MCodeFileName.setStyleSheet("background-color: red")
             self.MCodeFileName.setText("No M-Code File selected")
 
+    def ButtonMachineStatusUpdateClicked(self):
+        if self.AutoMachineUpdateRunning == 0:
+            self.StartAutoRefreshTimer()
+            self.AutoMachineUpdateRunning = 1
+            self.buttonMachineStatusUpdate.setText("Stop Update")
+        else:
+            self.AutoMachineUpdateRunning = 0
+            self.buttonMachineStatusUpdate.setText("Start Update")
+
     def ButtonGetStatusClicked(self):
-        self.spvcomm.UartSendCommand("getStatus", None)
+        self.spvcomm.SPVSendCommand("getStatus", None)
 
     def ButtonGetMachineStatusClicked(self):
-        self.spvcomm.UartSendCommand("getMachineStatus", None)
+        self.spvcomm.SPVSendCommand("getMachineStatus", None)
 
     def ButtonRequestChannelFillClicked(self):
         print("Requesting channel fill")
-        self.spvcomm.UartSendCommand("requestChannelFill", None)
+        self.spvcomm.SPVSendCommand("requestChannelFill", None)
         
     def ButtonRefreshUartClicked (self):
         print("Refresh")       
@@ -137,15 +153,15 @@ class Ui(QtWidgets.QMainWindow):
         print("Init not implemented yet!")
 
     def ButtonClearChannelsClicked(self):
-        self.spvcomm.UartSendCommand("clearChannels", None)
+        self.spvcomm.SPVSendCommand("clearChannels", None)
         print("Clear Channels")
 
     def ButtonStartPlayingClicked(self):
-        self.spvcomm.UartSendCommand("startPlaying", None)
+        self.spvcomm.SPVSendCommand("startPlaying", None)
         print("Start Playing")
 
     def ButtonStopPlayingClicked(self):
-        self.spvcomm.UartSendCommand("stopPlaying", None)
+        self.spvcomm.SPVSendCommand("stopPlaying", None)
         print("Stop Playing")
 
     def ButtonReadMcodeClicked(self):
@@ -221,7 +237,7 @@ class Ui(QtWidgets.QMainWindow):
                     budget = budget - number
                     data.extend(block)
         if len(data) > 0:
-            self.spvcomm.UartSendCommand("sendDatapoints", data)
+            self.spvcomm.SPVSendCommand("sendDatapoints", data)
 
     def UartErrorOccured(self, type):
         self.SetUartStatusIndicator("pending")
@@ -258,6 +274,17 @@ class Ui(QtWidgets.QMainWindow):
             block.append({"timediff": time, "pos": settings.testpositions_z[idx]})
         self.channels["str_dae"].appendDatapoints(block)
         print("Added test data to channels")
+
+    def StartAutoRefreshTimer(self):
+        milliseconds = int(self.textinMachineStatusUpdateInterval.text())
+        self.AutoMachineUpdateTimer = threading.Timer(milliseconds / 1e3, self.AutoRefreshCallback)
+        self.AutoMachineUpdateTimer.start()
+
+    def AutoRefreshCallback(self):
+        self.spvcomm.SPVSendCommand("getMachineStatus", None)
+        if self.AutoMachineUpdateRunning == 1:
+            self.StartAutoRefreshTimer()
+
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()

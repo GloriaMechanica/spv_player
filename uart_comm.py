@@ -26,13 +26,12 @@ class SPVUartConnection:
         self.uart_timeout_timer = None
         self.waiting_for_response = 0
         self.resend_counter = 0
-        self.last_command = None # used to keep the command in case it needs to be resent
-        self.last_data = None # used to keep the data in case it needs to be resent
         self.serial_con = None
         self.threadpool = PyQt5.QtCore.QThreadPool()
         self.poller = None
         self.callback_receive = callback["receive_handler"]
         self.callback_error = callback["error_handler"]
+        self.uart_send_buffer = []
 
     def getConnectState(self):
         return self.isconnected
@@ -146,17 +145,28 @@ class SPVUartConnection:
         data.extend(speed.to_bytes(1, "little"))
         self.UartSendCommand("moveChannelTo", data)
 
+
     # This is the command to use when you want to send a command to the SPV
+    def SPVSendCommand(self, command, data):
+        self.uart_send_buffer.append([command, data])
+        self.SendNextCommandFromBuffer()
+
+    # These other send functions are only used internally in this class
+    def SendNextCommandFromBuffer(self):
+        if self.waiting_for_response == 0 and (self.uart_send_buffer != []):
+            print(self.uart_send_buffer)
+            self.UartSendCommand(self.uart_send_buffer[0][0], self.uart_send_buffer[0][1])
+
     def UartSendCommand(self, command, data):
         self.resend_counter = 0
         self.UartTransmitCommand(command, data)
         self.StartUartTimeout()
 
     def UartResendCommand(self):
-        self.UartTransmitCommand(self.last_command, self.last_data)
+        if self.uart_send_buffer != []:
+            self.UartTransmitCommand(self.uart_send_buffer[0][0], self.uart_send_buffer[0][1])
         self.StartUartTimeout()
 
-    # This function is only used internally in this class
     def UartTransmitCommand(self, command, data):
         tempdata = bytearray(b'\xCA\xFE')  # UID
         if data is not None:
@@ -190,8 +200,6 @@ class SPVUartConnection:
         crcval = crc16(tempdata, len(tempdata))
         tempdata.extend(crcval.to_bytes(length=2, byteorder='big'))
         self.serial_con.write(tempdata)
-        self.last_command = command  # store in case it needs to be resent
-        self.last_data = data
         print("Send: CRC=" + hex(crcval) + " length=" + str(length))
 
     def UartTimeoutExpire(self):
@@ -202,8 +210,10 @@ class SPVUartConnection:
             print("Resending command.")
         else:
             print("Exceeded resend tries!")
+            if self.uart_send_buffer != []:
+                self.uart_send_buffer.remove(self.uart_send_buffer[0])
             self.callback_error("Timeout expire!")
-        self.waiting_for_response = 0
+            self.waiting_for_response = 0
 
     def StartUartTimeout(self):
         # Timeout until the response (Ack/Nack) should arrive from the SPV
@@ -215,7 +225,10 @@ class SPVUartConnection:
         check = self.UartCheckPacket(data)
         if self.waiting_for_response == 1 and check == settings.UartPacketErrors.packetCorrect:
             self.uart_timeout_timer.cancel()
+            if self.uart_send_buffer != []:
+                self.uart_send_buffer.remove(self.uart_send_buffer[0])
             self.waiting_for_response = 0
+            self.SendNextCommandFromBuffer()
         print("Check result: " + str(check))
         self.callback_receive(data)
 
