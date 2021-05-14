@@ -777,11 +777,24 @@
     <property name="title">
      <string>M-Code input</string>
     </property>
-    <widget class="QPushButton" name="buttonReadMcode">
+    <widget class="QLabel" name="MCodeFileName">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>35</y>
+       <width>380</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>No M-Code File selected</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonReadMcode">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>55</y>
        <width>161</width>
        <height>25</height>
       </rect>
@@ -794,7 +807,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>65</y>
+       <y>90</y>
        <width>161</width>
        <height>25</height>
       </rect>
