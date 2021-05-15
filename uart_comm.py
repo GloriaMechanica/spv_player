@@ -84,7 +84,7 @@ class SPVUartConnection:
             elif command_string == "AxisStatus" and length == settings.SPVAnswerTags[command_string][1]:
                 channel_nr = datum[0]
                 moving = datum[1]
-                position = int.from_bytes(datum[2:4], 'little')
+                position = int.from_bytes(datum[2:4], 'little', signed=True)
                 result.append({"tag": command_string, "channel":channel_nr, "moving":moving, "position":position})
             ptr = ptr + length + 2
         return result
@@ -145,6 +145,23 @@ class SPVUartConnection:
         data.extend(speed.to_bytes(1, "little"))
         self.UartSendCommand("moveChannelTo", data)
 
+    def MoveAxisRelative(self, channel_descriptor, pos_diff, speed):
+        print("Want to channel axis " + channel_descriptor + " relative by " + str(pos_diff) + " steps")
+        data = bytearray()
+        channel_nr = SPVChannelNumbers[channel_descriptor]
+        data.extend(channel_nr.to_bytes(1, "little"))
+        data.extend(pos_diff.to_bytes(2, "little", signed=True))
+        data.extend(speed.to_bytes(1, "little"))
+        self.UartSendCommand("moveChannelRelative", data)
+
+    def ReferenceAxis(self, channel_descriptor, speed):
+        print("Want to reference axis " + channel_descriptor)
+        data = bytearray()
+        channel_nr = SPVChannelNumbers[channel_descriptor]
+        data.extend(channel_nr.to_bytes(1, "little"))
+        data.extend(speed.to_bytes(1, "little"))
+        self.UartSendCommand("referenceChannel", data)
+
 
     # This is the command to use when you want to send a command to the SPV
     def SPVSendCommand(self, command, data):
@@ -190,6 +207,10 @@ class SPVUartConnection:
             cmdbyte = b'\x06'
         elif command == "moveChannelTo":
             cmdbyte = b'\x09'
+        elif command == "moveChannelRelative":
+            cmdbyte = b'\x0A'
+        elif command == "referenceChannel":
+            cmdbyte = b'\x0B'
         else:
             cmdbyte = b'\xFF'  # invalid
         tempdata.extend(length.to_bytes(2, "big"))

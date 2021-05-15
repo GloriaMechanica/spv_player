@@ -88,8 +88,15 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonMovePosxTo.clicked.connect(self.ButtonMovePosxClicked)
         self.buttonMovePosyTo.clicked.connect(self.ButtonMovePosyClicked)
         self.buttonMoveStrTo.clicked.connect(self.ButtonMoveStrClicked)
+        self.buttonPOSXDAEMoveRelPositive.clicked.connect(self.ButtonMovePosxRelPlusClicked)
+        self.buttonPOSYDAEMoveRelPositive.clicked.connect(self.ButtonMovePosyRelPlusClicked)
+        self.buttonSTRDAEMoveRelPositive.clicked.connect(self.ButtonMoveStrRelPlusClicked)
+        self.buttonPOSXDAEMoveRelNegative.clicked.connect(self.ButtonMovePosxRelMinusClicked)
+        self.buttonPOSYDAEMoveRelNegative.clicked.connect(self.ButtonMovePosyRelMinusClicked)
+        self.buttonSTRDAEMoveRelNegative.clicked.connect(self.ButtonMoveStrRelMinusClicked)
         self.buttonGetMachineStatus.clicked.connect(self.ButtonGetMachineStatusClicked)
         self.buttonMachineStatusUpdate.clicked.connect(self.ButtonMachineStatusUpdateClicked)
+        self.buttonReferenceLimitSwitches.clicked.connect(self.ButtonReferenceAxisClicked)
 
 
     def ButtonTestClicked (self): 
@@ -198,6 +205,28 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonMoveStrClicked(self):
         self.spvcomm.MoveAxisTo("str_dae",  int(self.textinStrPos.text()), 20)
+
+    def ButtonMovePosxRelPlusClicked(self):
+        self.spvcomm.MoveAxisRelative("posx_dae", int(self.textinPOSXDAEMoveRel.text()), 20)
+
+    def ButtonMovePosyRelPlusClicked(self):
+        self.spvcomm.MoveAxisRelative("posy_dae", int(self.textinPOSYDAEMoveRel.text()), 20)
+
+    def ButtonMoveStrRelPlusClicked(self):
+        self.spvcomm.MoveAxisRelative("str_dae", int(self.textinSTRDAEMoveRel.text()), 20)
+
+    def ButtonMovePosxRelMinusClicked(self):
+        self.spvcomm.MoveAxisRelative("posx_dae", -int(self.textinPOSXDAEMoveRel.text()), 20)
+
+    def ButtonMovePosyRelMinusClicked(self):
+        self.spvcomm.MoveAxisRelative("posy_dae", -int(self.textinPOSYDAEMoveRel.text()), 20)
+
+    def ButtonMoveStrRelMinusClicked(self):
+        self.spvcomm.MoveAxisRelative("str_dae", -int(self.textinSTRDAEMoveRel.text()), 20)
+
+    def ButtonReferenceAxisClicked(self):
+        self.spvcomm.ReferenceAxis("posx_dae", 5)
+        #For test only reference x axis
 
     def UartReceiveEvent(self, data):
         print("Something has been received")
