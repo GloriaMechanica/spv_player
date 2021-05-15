@@ -98,6 +98,14 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonMachineStatusUpdate.clicked.connect(self.ButtonMachineStatusUpdateClicked)
         self.buttonReferenceLimitSwitches.clicked.connect(self.ButtonReferenceAxisClicked)
 
+        self.buttonCalculateCal.clicked.connect(self.ButtonCalculateCalClicked)
+        self.buttonCalDString.clicked.connect(self.ButtonCalDStringClicked)
+        self.buttonCalAString.clicked.connect(self.ButtonCalAStringClicked)
+        self.buttonCalStrMin.clicked.connect(self.ButtonCalStrMinClicked)
+        self.buttonCalStrMax.clicked.connect(self.ButtonCalStrMaxClicked)
+
+
+
 
     def ButtonTestClicked (self): 
         print("Test clicked!")
@@ -227,6 +235,21 @@ class Ui(QtWidgets.QMainWindow):
     def ButtonReferenceAxisClicked(self):
         self.spvcomm.ReferenceAxis("posx_dae", 5)
         #For test only reference x axis
+
+    def ButtonCalculateCalClicked(self):
+        return None;
+
+    def ButtonCalDStringClicked(self):
+        return None;
+
+    def ButtonCalAStringClicked(self):
+        return None;
+
+    def ButtonCalStrMinClicked(self):
+        return None;
+
+    def ButtonCalStrMaxClicked(self):
+        return None;
 
     def UartReceiveEvent(self, data):
         print("Something has been received")
