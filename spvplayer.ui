@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1066</width>
-    <height>810</height>
+    <width>1083</width>
+    <height>881</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -172,7 +172,7 @@
      <rect>
       <x>20</x>
       <y>110</y>
-      <width>621</width>
+      <width>806</width>
       <height>296</height>
      </rect>
     </property>
@@ -751,6 +751,253 @@
       <string>Stop</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="groupBox_10">
+     <property name="geometry">
+      <rect>
+       <x>625</x>
+       <y>30</y>
+       <width>171</width>
+       <height>261</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Manual Move</string>
+     </property>
+     <widget class="QLabel" name="label_20">
+      <property name="geometry">
+       <rect>
+        <x>55</x>
+        <y>35</y>
+        <width>31</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>mm</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinManualMoveR">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>30</y>
+        <width>36</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>5</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_22">
+      <property name="geometry">
+       <rect>
+        <x>135</x>
+        <y>35</y>
+        <width>16</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>°</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinManualMovePhi">
+      <property name="geometry">
+       <rect>
+        <x>95</x>
+        <y>30</y>
+        <width>36</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>0</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ButtonMovePosLevers">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>120</y>
+        <width>141</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Move POS levers</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_23">
+      <property name="geometry">
+       <rect>
+        <x>115</x>
+        <y>155</y>
+        <width>31</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>mm</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinManualMoveStr">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>150</y>
+        <width>46</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>5</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ButtonMoveStrAxis">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>210</y>
+        <width>136</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Move STR axis</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_24">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>65</y>
+        <width>46</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>speed:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinManualMovePosSpeed">
+      <property name="geometry">
+       <rect>
+        <x>65</x>
+        <y>60</y>
+        <width>36</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>20</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_25">
+      <property name="geometry">
+       <rect>
+        <x>105</x>
+        <y>65</y>
+        <width>36</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>rad/s</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinManualMoveStrSpeed">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>180</y>
+        <width>46</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>20</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_26">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>185</y>
+        <width>46</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>speed:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_27">
+      <property name="geometry">
+       <rect>
+        <x>115</x>
+        <y>185</y>
+        <width>36</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>rad/s</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_28">
+      <property name="geometry">
+       <rect>
+        <x>25</x>
+        <y>155</y>
+        <width>46</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>pos:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ButtonPredefinedPositionE">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>90</y>
+        <width>41</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ButtonPredefinedPositionA">
+      <property name="geometry">
+       <rect>
+        <x>65</x>
+        <y>90</y>
+        <width>41</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ButtonPredefinedPositionD">
+      <property name="geometry">
+       <rect>
+        <x>115</x>
+        <y>90</y>
+        <width>41</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>D</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_6">
     <property name="geometry">
@@ -820,8 +1067,8 @@
    <widget class="QGroupBox" name="groupBox_7">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>110</y>
+      <x>620</x>
+      <y>440</y>
       <width>306</width>
       <height>341</height>
      </rect>
@@ -857,7 +1104,7 @@
      <widget class="QLabel" name="label_18">
       <property name="geometry">
        <rect>
-        <x>215</x>
+        <x>155</x>
         <y>60</y>
         <width>31</width>
         <height>17</height>
@@ -867,36 +1114,10 @@
        <string>mm</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="textinMachineStatusUpdateInterval_4">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>55</y>
-        <width>36</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>9</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_17">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>55</y>
-        <width>16</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>°</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_16">
       <property name="geometry">
        <rect>
-        <x>215</x>
+        <x>155</x>
         <y>30</y>
         <width>31</width>
         <height>17</height>
@@ -906,7 +1127,7 @@
        <string>mm</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="buttonTest_3">
+     <widget class="QPushButton" name="buttonCalAString">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -919,33 +1140,7 @@
        <string>A-string</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_15">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>30</y>
-        <width>16</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>°</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="textinMachineStatusUpdateInterval_2">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>25</y>
-        <width>36</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>-9</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="buttonTest_2">
+     <widget class="QPushButton" name="buttonCalDString">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -958,10 +1153,10 @@
        <string>D-string</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="textinMachineStatusUpdateInterval_3">
+     <widget class="QLineEdit" name="textinCalDStringDistance">
       <property name="geometry">
        <rect>
-        <x>170</x>
+        <x>110</x>
         <y>25</y>
         <width>36</width>
         <height>25</height>
@@ -971,10 +1166,10 @@
        <string>0</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="textinMachineStatusUpdateInterval_5">
+     <widget class="QLineEdit" name="textinCalAStringDistance">
       <property name="geometry">
        <rect>
-        <x>170</x>
+        <x>110</x>
         <y>55</y>
         <width>36</width>
         <height>25</height>
@@ -984,7 +1179,7 @@
        <string>0</string>
       </property>
      </widget>
-     <widget class="QLabel" name="lblPOSXDAEMovingIndicator_2">
+     <widget class="QLabel" name="lblCalDStringIndicator">
       <property name="geometry">
        <rect>
         <x>260</x>
@@ -997,7 +1192,7 @@
        <string>X</string>
       </property>
      </widget>
-     <widget class="QLabel" name="lblPOSXDAEMovingIndicator_3">
+     <widget class="QLabel" name="lblCalAStringIndicator">
       <property name="geometry">
        <rect>
         <x>260</x>
@@ -1008,6 +1203,58 @@
       </property>
       <property name="text">
        <string>X</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinCalAStringAngle">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>55</y>
+        <width>36</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>9</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_17">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>55</y>
+        <width>16</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>°</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>30</y>
+        <width>16</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>°</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="textinCalDStringAngle">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>25</y>
+        <width>36</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>-9</string>
       </property>
      </widget>
     </widget>
@@ -1049,7 +1296,7 @@
        <string>mm</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="buttonTest_4">
+     <widget class="QPushButton" name="buttonCalStrMax">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -1062,7 +1309,7 @@
        <string>Maximum</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="buttonTest_5">
+     <widget class="QPushButton" name="buttonCalStrMin">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -1075,7 +1322,7 @@
        <string>Minimum</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="textinMachineStatusUpdateInterval_8">
+     <widget class="QLineEdit" name="textinCalStrMin">
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -1088,7 +1335,7 @@
        <string>0</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="textinMachineStatusUpdateInterval_9">
+     <widget class="QLineEdit" name="textinCalStrMax">
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -1101,7 +1348,7 @@
        <string>500</string>
       </property>
      </widget>
-     <widget class="QLabel" name="lblPOSXDAEMovingIndicator_4">
+     <widget class="QLabel" name="lblCalStrMinIndicator">
       <property name="geometry">
        <rect>
         <x>255</x>
@@ -1114,7 +1361,7 @@
        <string>X</string>
       </property>
      </widget>
-     <widget class="QLabel" name="lblPOSXDAEMovingIndicator_5">
+     <widget class="QLabel" name="lblCalStrMaxIndicator">
       <property name="geometry">
        <rect>
         <x>255</x>
@@ -1141,7 +1388,7 @@
       <string>Reference limit switches</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="buttonCalculateCal">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -1161,7 +1408,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1066</width>
+     <width>1083</width>
      <height>22</height>
     </rect>
    </property>

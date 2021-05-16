@@ -137,22 +137,22 @@ class SPVUartConnection:
         return [obtained_number, data]
 
     def MoveAxisTo(self, channel_descriptor, pos, speed):
-        print("Want to channel axis " + channel_descriptor + " to pos=" + str(pos))
+        print("Want to move axis " + channel_descriptor + " to pos=" + str(pos))
         data = bytearray()
         channel_nr = SPVChannelNumbers[channel_descriptor]
         data.extend(channel_nr.to_bytes(1, "little"))
         data.extend(pos.to_bytes(2, "little"))
         data.extend(speed.to_bytes(1, "little"))
-        self.UartSendCommand("moveChannelTo", data)
+        self.SPVSendCommand("moveChannelTo", data)
 
     def MoveAxisRelative(self, channel_descriptor, pos_diff, speed):
-        print("Want to channel axis " + channel_descriptor + " relative by " + str(pos_diff) + " steps")
+        print("Want to move axis " + channel_descriptor + " relative by " + str(pos_diff) + " steps")
         data = bytearray()
         channel_nr = SPVChannelNumbers[channel_descriptor]
         data.extend(channel_nr.to_bytes(1, "little"))
         data.extend(pos_diff.to_bytes(2, "little", signed=True))
         data.extend(speed.to_bytes(1, "little"))
-        self.UartSendCommand("moveChannelRelative", data)
+        self.SPVSendCommand("moveChannelRelative", data)
 
     def ReferenceAxis(self, channel_descriptor, speed):
         print("Want to reference axis " + channel_descriptor)
@@ -160,7 +160,7 @@ class SPVUartConnection:
         channel_nr = SPVChannelNumbers[channel_descriptor]
         data.extend(channel_nr.to_bytes(1, "little"))
         data.extend(speed.to_bytes(1, "little"))
-        self.UartSendCommand("referenceChannel", data)
+        self.SPVSendCommand("referenceChannel", data)
 
 
     # This is the command to use when you want to send a command to the SPV

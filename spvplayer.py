@@ -84,6 +84,13 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonStopPlaying.clicked.connect(self.ButtonStopPlayingClicked)
         self.buttonClearChannels.clicked.connect(self.ButtonClearChannelsClicked)
         self.buttonReadMcode.clicked.connect(self.ButtonReadMcodeClicked)
+
+
+        self.buttonGetMachineStatus.clicked.connect(self.ButtonGetMachineStatusClicked)
+        self.buttonMachineStatusUpdate.clicked.connect(self.ButtonMachineStatusUpdateClicked)
+        self.buttonReferenceLimitSwitches.clicked.connect(self.ButtonReferenceAxisClicked)
+
+        # Manual Move
         self.buttonMoveENoteTo.clicked.connect(self.ButtonMoveENoteClicked)
         self.buttonMovePosxTo.clicked.connect(self.ButtonMovePosxClicked)
         self.buttonMovePosyTo.clicked.connect(self.ButtonMovePosyClicked)
@@ -94,22 +101,22 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonPOSXDAEMoveRelNegative.clicked.connect(self.ButtonMovePosxRelMinusClicked)
         self.buttonPOSYDAEMoveRelNegative.clicked.connect(self.ButtonMovePosyRelMinusClicked)
         self.buttonSTRDAEMoveRelNegative.clicked.connect(self.ButtonMoveStrRelMinusClicked)
-        self.buttonGetMachineStatus.clicked.connect(self.ButtonGetMachineStatusClicked)
-        self.buttonMachineStatusUpdate.clicked.connect(self.ButtonMachineStatusUpdateClicked)
-        self.buttonReferenceLimitSwitches.clicked.connect(self.ButtonReferenceAxisClicked)
+        self.ButtonMovePosLevers.clicked.connect(self.ButtonMovePosLeversClicked)
+        self.ButtonMoveStrAxis.clicked.connect(self.ButtonMoveStrAxisClicked)
+        self.ButtonPredefinedPositionE.clicked.connect(self.ButtonPredefinedPositionEClicked)
+        self.ButtonPredefinedPositionA.clicked.connect(self.ButtonPredefinedPositionAClicked)
+        self.ButtonPredefinedPositionD.clicked.connect(self.ButtonPredefinedPositionDClicked)
 
+
+        # Calibration
         self.buttonCalculateCal.clicked.connect(self.ButtonCalculateCalClicked)
         self.buttonCalDString.clicked.connect(self.ButtonCalDStringClicked)
         self.buttonCalAString.clicked.connect(self.ButtonCalAStringClicked)
         self.buttonCalStrMin.clicked.connect(self.ButtonCalStrMinClicked)
         self.buttonCalStrMax.clicked.connect(self.ButtonCalStrMaxClicked)
 
-
-
-
     def ButtonTestClicked (self): 
-        print("Test clicked!")
-
+        print("test clicked")
 
     def OpenFileDialog(self):
         options = QFileDialog.Options()
@@ -234,22 +241,62 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonReferenceAxisClicked(self):
         self.spvcomm.ReferenceAxis("posx_dae", 5)
+        self.spvcomm.ReferenceAxis("posy_dae", 5)
         #For test only reference x axis
 
+    def ButtonMovePosLeversClicked(self):
+        r = float(self.textinManualMoveR.text())
+        phi = float(self.textinManualMovePhi.text())
+        point = {"channel":"pos_dae", "paramlist":[r, phi]}
+        [steps_x, steps_y] = self.machine.convert_pos_point(point, settings.calibration)
+        self.spvcomm.MoveAxisTo("posx_dae", steps_x, int(self.textinManualMovePosSpeed.text()))
+        self.spvcomm.MoveAxisTo("posy_dae", steps_y, int(self.textinManualMovePosSpeed.text()))
+
+    def ButtonMoveStrAxisClicked(self):
+        stroke = float(self.textinManualMoveStr.text())
+        point = {"channel": "str_dae", "paramlist": [stroke]}
+        steps = self.machine.convert_str_point(point, settings.calibration)
+        self.spvcomm.MoveAxisTo("str_dae", steps, int(self.textinManualMoveStrSpeed.text()))
+
+    def ButtonPredefinedPositionEClicked(self):
+        self.textinManualMovePhi.setText("27")
+
+    def ButtonPredefinedPositionAClicked(self):
+        self.textinManualMovePhi.setText("9")
+
+    def ButtonPredefinedPositionDClicked(self):
+        self.textinManualMovePhi.setText("-9")
+
     def ButtonCalculateCalClicked(self):
-        return None;
+        print("Save calibration!")
+        cal = self.machine.calculate_new_calibration(settings.calibration_nominal, settings.calibration_positions, settings.calibration)
+        print(cal)
+        settings.calibration = cal
+
 
     def ButtonCalDStringClicked(self):
-        return None;
+        self.lblCalDStringIndicator.setStyleSheet("background-color: green")
+        settings.calibration_positions["posx1"] = self.machine.machine_state["posx_dae_pos"]
+        settings.calibration_positions["posy1"] = self.machine.machine_state["posy_dae_pos"]
+        settings.calibration_nominal["r1"] = float(self.textinCalDStringDistance.text())
+        settings.calibration_nominal["phi1"] = float(self.textinCalDStringAngle.text())
 
     def ButtonCalAStringClicked(self):
-        return None;
+        self.lblCalAStringIndicator.setStyleSheet("background-color: green")
+        settings.calibration_positions["posx2"] = self.machine.machine_state["posx_dae_pos"]
+        settings.calibration_positions["posy2"] = self.machine.machine_state["posy_dae_pos"]
+        settings.calibration_nominal["r2"] = float(self.textinCalAStringDistance.text())
+        settings.calibration_nominal["phi2"] = float(self.textinCalAStringAngle.text())
 
     def ButtonCalStrMinClicked(self):
-        return None;
+        self.lblCalStrMinIndicator.setStyleSheet("background-color: green")
+        settings.calibration_positions["str1"] = self.machine.machine_state["str_dae_pos"]
+        settings.calibration_nominal["str_mm1"] = float(self.textinCalStrMin.text())
 
     def ButtonCalStrMaxClicked(self):
-        return None;
+        self.lblCalStrMaxIndicator.setStyleSheet("background-color: green")
+        settings.calibration_positions["str2"] = self.machine.machine_state["str_dae_pos"]
+        settings.calibration_nominal["str_mm2"] = float(self.textinCalStrMax.text())
 
     def UartReceiveEvent(self, data):
         print("Something has been received")
@@ -258,17 +305,14 @@ class Ui(QtWidgets.QMainWindow):
         print(tags)
 
         self.HandDatapointsToSPV(tags)
-        self.UpdateMachineStatus(tags)
+        self.machine.UpdateMachineStatus(tags)
+        self.UpdateMachineStatusLabels(self.machine.machine_state)
 
-    def UpdateMachineStatus(self, tags):
-        for tag in tags:
-            if tag["tag"] == "AxisStatus":
-                if tag["channel"] == settings.SPVChannelNumbers["posx_dae"]:
-                    self.lblPOSXDAEPos.setText(str(tag["position"]))
-                elif tag["channel"] == settings.SPVChannelNumbers["posy_dae"]:
-                    self.lblPOSYDAEPos.setText(str(tag["position"]))
-                elif tag["channel"] == settings.SPVChannelNumbers["str_dae"]:
-                    self.lblSTRDAEPos.setText(str(tag["position"]))
+
+    def UpdateMachineStatusLabels(self, machine_status):
+        self.lblPOSXDAEPos.setText(str(self.machine.machine_state["posx_dae_pos"]))
+        self.lblPOSYDAEPos.setText(str(self.machine.machine_state["posy_dae_pos"]))
+        self.lblSTRDAEPos.setText(str(self.machine.machine_state["str_dae_pos"]))
 
     def HandDatapointsToSPV(self, tags):
         # If any requests for new datapoints are among the tags, we prepare the data now.

@@ -7,6 +7,8 @@ import settings
 class Machine_SPV:
 
     def __init__(self):
+        # coordinates that machine is currently at
+        self.machine_state = {"posx_dae_pos":0, "posy_dae_pos":0, "str_dae_pos":0}
         print("Init machine")
 
     """
@@ -68,7 +70,8 @@ class Machine_SPV:
         if np.abs(angle_left) > np.pi / 2 and np.abs(angle_right) > np.pi / 2:
             print("##### ERROR: Angle out of range #####")
             return False
-
+        #print("alpha x: " + str(angle_left))
+        #print("alpha y: " + str(angle_right))
         return [angle_left, angle_right]
 
 
@@ -111,7 +114,7 @@ class Machine_SPV:
         return [R, phi]
 
     def convert_str_point(self, input_point, calibration):
-        return int(int(input_point["paramlist"][0])*calibration["str_steps_per_mm"]) + calibration["str_steps_offset"]
+        return int(int(input_point["paramlist"][0])*calibration["str_steps_per_mm"] + calibration["str_steps_offset"])
 
     def convert_pos_point(self, input_point, calibration):
         if input_point["channel"] == "pos_dae":
@@ -125,8 +128,8 @@ class Machine_SPV:
             else:
                 print("Polar to machine conversion error!")
 
-            steps_x = int(np.rad2deg(angle_x) * calibration["posx_steps_per_degree"]) + calibration["posx_steps_offset"]
-            steps_y = int(np.rad2deg(-angle_y) * calibration["posy_steps_per_degree"]) + calibration["posy_steps_offset"]
+            steps_x = int(np.rad2deg(angle_x) * calibration["posx_steps_per_degree"] + calibration["posx_steps_offset"])
+            steps_y = int(np.rad2deg(angle_y) * calibration["posy_steps_per_degree"] + calibration["posy_steps_offset"])
             return [steps_x, steps_y]
         else:
             print("GDA string not supported yet!")
@@ -157,5 +160,64 @@ class Machine_SPV:
                     return None
                 else:
                     return note
+
+    # nominal points: what it is in abstract coordinates (mm, r and phi in degrees)
+    # machine points: what the machine returns in steps at point 1 and 2
+    # calibration: old calibration (needed for roller radius and machine geometry)
+    def calculate_new_calibration(self, nominal_points, machine_points, calibration):
+        cal_mod = calibration
+        r1 = nominal_points["r1"]
+        phi1 = nominal_points["phi1"]
+        r2 = nominal_points["r2"]
+        phi2 = nominal_points["phi2"]
+        str_mm1 = nominal_points["str_mm1"]
+        str_mm2 = nominal_points["str_mm2"]
+
+        posx1 = machine_points["posx1"]
+        posy1 = machine_points["posy1"]
+        posx2 = machine_points["posx2"]
+        posy2 = machine_points["posy2"]
+        str1 = machine_points["str1"]
+        str2 = machine_points["str2"]
+
+        radius1 = r1 + calibration["nominal_string_radius"]
+        radius2 = r2 + calibration["nominal_string_radius"]
+        angle1 = np.deg2rad(phi1)
+        angle2 = np.deg2rad(phi2)
+        ret1 = self.PolarToAngle([radius1, angle1], calibration)
+        ret2 = self.PolarToAngle([radius2, angle2], calibration)
+        if (ret1 is not False) and (ret2 is not False):
+            ax1 = np.rad2deg(ret1[0])
+            ay1 = np.rad2deg(ret1[1])
+            ax2 = np.rad2deg(ret2[0])
+            ay2 = np.rad2deg(ret2[1])
+        else:
+            print("Polar to machine conversion error!")
+            return
+
+        M = np.array([[ax1, 1, 0, 0], [0, 0, ay1, 1], [ax2, 1, 0, 0], [0, 0, ay2, 1]])
+        p = np.array([posx1, posy1, posx2, posy2])
+        k_pos = np.dot(np.linalg.inv(M), p)
+
+        k_str = (str2 - str1)/(str_mm2 - str_mm1)
+        d_str = str1 - k_str*str_mm1
+
+        cal_mod["posx_steps_per_degree"] = k_pos[0]
+        cal_mod["posx_steps_offset"] = k_pos[1]
+        cal_mod["posy_steps_per_degree"] = k_pos[2]
+        cal_mod["posy_steps_offset"] = k_pos[3]
+        cal_mod["str_steps_per_mm"] = k_str
+        cal_mod["str_steps_offset"] = d_str
+        return cal_mod
+
+    def UpdateMachineStatus(self, tags):
+        for tag in tags:
+            if tag["tag"] == "AxisStatus":
+                if tag["channel"] == settings.SPVChannelNumbers["posx_dae"]:
+                     self.machine_state["posx_dae_pos"] = tag["position"]
+                elif tag["channel"] == settings.SPVChannelNumbers["posy_dae"]:
+                    self.machine_state["posy_dae_pos"] = tag["position"]
+                elif tag["channel"] == settings.SPVChannelNumbers["str_dae"]:
+                    self.machine_state["str_dae_pos"] = tag["position"]
 
     #TODO: Function that calculates minimal time required to do certain move.
