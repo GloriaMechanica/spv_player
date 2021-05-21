@@ -114,6 +114,7 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonCalAString.clicked.connect(self.ButtonCalAStringClicked)
         self.buttonCalStrMin.clicked.connect(self.ButtonCalStrMinClicked)
         self.buttonCalStrMax.clicked.connect(self.ButtonCalStrMaxClicked)
+        self.checkboxTwoPointCalibration.stateChanged.connect(self.CheckBoxTwoPointCalibrationClicked)
 
     def ButtonTestClicked (self): 
         print("test clicked")
@@ -209,6 +210,12 @@ class Ui(QtWidgets.QMainWindow):
         for b in buf:
             print(b)
 
+    def CheckBoxTwoPointCalibrationClicked(self):
+        if self.checkboxTwoPointCalibration.isChecked() == True:
+            self.buttonCalDString.setDisabled(False)
+        else:
+            self.buttonCalDString.setDisabled(True)
+
     def ButtonMoveENoteClicked(self):
         self.spvcomm.MoveAxisTo("e_note", 0, 0)
 
@@ -242,6 +249,7 @@ class Ui(QtWidgets.QMainWindow):
     def ButtonReferenceAxisClicked(self):
         self.spvcomm.ReferenceAxis("posx_dae", 5)
         self.spvcomm.ReferenceAxis("posy_dae", 5)
+        self.spvcomm.ReferenceAxis("str_dae", 5)
         #For test only reference x axis
 
     def ButtonMovePosLeversClicked(self):
@@ -269,7 +277,11 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonCalculateCalClicked(self):
         print("Save calibration!")
-        cal = self.machine.calculate_new_calibration(settings.calibration_nominal, settings.calibration_positions, settings.calibration)
+        if self.checkboxTwoPointCalibration.isChecked() == True:
+            points = "two"
+        else:
+            points = "one"
+        cal = self.machine.calculate_new_calibration(settings.calibration_nominal, settings.calibration_positions, settings.calibration, points)
         print(cal)
         settings.calibration = cal
 

@@ -2,13 +2,18 @@ import numpy as np
 
 # everything in mm, degrees or steps
 calibration_old = {"posx_x": -60, "posx_y": 25, "posx_r": 25,
-               "posx_steps_offset":600, "posx_steps_per_degree":11,
+               "posx_steps_offset":600, "posx_steps_per_degree":-8.755,
                "posy_x": 60, "posy_y": 50, "posy_r": 35,
-               "posy_steps_offset":600, "posy_steps_per_degree":11,
+               "posy_steps_offset":600, "posy_steps_per_degree":-8.755,
                "roller_r": 5, "nominal_string_radius":38,
                "str_steps_offset": 0, "str_steps_per_mm":13,
                "posy_steps_per_degree":10}
-calibration = {'posx_x': -60, 'posx_y': 25, 'posx_r': 25, 'posx_steps_offset': 460.95466606309594, 'posx_steps_per_degree': -4.741825872951676, 'posy_x': 60, 'posy_y': 50, 'posy_r': 35, 'posy_steps_offset': 277.76155112856645, 'posy_steps_per_degree': -8.387881784244204, 'roller_r': 5, 'nominal_string_radius': 38, 'str_steps_offset': 0.0, 'str_steps_per_mm': 11.6}
+calibration = {'posx_x': -60, 'posx_y': 25, 'posx_r': 25,
+                'posy_x': 60, 'posy_y': 50, 'posy_r': 35,
+                'posx_steps_offset': 507.1526894161782, 'posx_steps_per_degree': -8.755,
+               'posy_steps_offset': 230.223071967713, 'posy_steps_per_degree': -8.755,
+               'roller_r': 5, 'nominal_string_radius': 38,
+               +'str_steps_offset': -1.0, 'str_steps_per_mm': 12.0}
 
 calibration_positions = {}
 calibration_nominal = {}

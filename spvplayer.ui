@@ -1070,7 +1070,7 @@
       <x>620</x>
       <y>440</y>
       <width>306</width>
-      <height>341</height>
+      <height>381</height>
      </rect>
     </property>
     <property name="title">
@@ -1095,7 +1095,7 @@
        <x>10</x>
        <y>90</y>
        <width>281</width>
-       <height>91</height>
+       <height>116</height>
       </rect>
      </property>
      <property name="title">
@@ -1141,6 +1141,9 @@
       </property>
      </widget>
      <widget class="QPushButton" name="buttonCalDString">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -1257,12 +1260,25 @@
        <string>-9</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="checkboxTwoPointCalibration">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>90</y>
+        <width>176</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>two point calibration</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="groupBox_9">
      <property name="geometry">
       <rect>
        <x>15</x>
-       <y>195</y>
+       <y>235</y>
        <width>276</width>
        <height>91</height>
       </rect>
@@ -1392,7 +1408,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>300</y>
+       <y>340</y>
        <width>261</width>
        <height>25</height>
       </rect>
