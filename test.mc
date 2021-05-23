@@ -1,14 +1,14 @@
 // Titel: Alle meine Entchen in E-Dur
 // Datum: 13.3.2021
 
-#define $T1 4000 // ganze Note
-#define $T2 2000 // halbe Note
-#define $T4 1000 // viertel Note
-#define $T8 500 // achtel Note
-#define $T16 250 // sechzehntel Note
+#define $T1 2000 // ganze Note
+#define $T2 1000 // halbe Note
+#define $T4 500 // viertel Note
+#define $T8 250 // achtel Note
+#define $T16 125 // sechzehntel Note
 
-#define $POSE -18 // Position der E-Saite in Grad (Polarkoordinaten)
-#define $DOWN -2 // Normaler Andruck des Bogens in mm
+#define $POSE 27 // Position der E-Saite in Grad (Polarkoordinaten)
+#define $DOWN -1 // Normaler Andruck des Bogens in mm
 
 #begin
 -300 pos_dae 5 $POSE
@@ -20,12 +20,12 @@
 !+$T4 e_note F5# // Nach einem Viertel eine weitere Note
 
 -0 str_dae 50 // Wieder zurück streichen
-!+$T4 e_note G5
+!+$T4 e_note G5#
 
 -0 str_dae 150 // Wieder vorwärts
 -0 pos_dae $DOWN $POSE
 !+$T4 e_note A5
-+80 pos_dae -4 $POSE // Hier wird kurz fester angedrückt.
++80 pos_dae -2 $POSE // Hier wird kurz fester angedrückt.
 +300 pos_dae $DOWN $POSE
 -0 str_dae 50
 !+$T2 e_note B5

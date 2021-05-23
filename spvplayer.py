@@ -176,6 +176,7 @@ class Ui(QtWidgets.QMainWindow):
             self.SetUartStatusIndicator("disconnected")
 
     def ButtonRewindClicked(self):
+        self.channels["e_note"].resetTimeToStart()
         self.channels["posx_dae"].resetTimeToStart()
         self.channels["posy_dae"].resetTimeToStart()
         self.channels["str_dae"].resetTimeToStart()
@@ -212,17 +213,24 @@ class Ui(QtWidgets.QMainWindow):
             self.cmd_list = self.mcreader.cmd_list_generator(cmd_list)
             self.mcode_raw_lines = mcode_raw_lines
 
+            print("Command list from mcode file")
             print(self.cmd_list)
             for d in data:
                 print(d)
             self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
+        print("Status of e_note channel")
+        buf = self.channels["e_note"].getChannelBuffer()
+        for b in buf:
+            print(b)
         print("Status of posx_dae channel")
         buf = self.channels["posx_dae"].getChannelBuffer()
         for b in buf:
             print(b)
+        print("Status of posy_dae channel")
         buf = self.channels["posy_dae"].getChannelBuffer()
         for b in buf:
             print(b)
+        print("Status of str_dae channel")
         buf = self.channels["str_dae"].getChannelBuffer()
         for b in buf:
             print(b)
@@ -234,7 +242,7 @@ class Ui(QtWidgets.QMainWindow):
             self.buttonCalDString.setDisabled(True)
 
     def ButtonMoveENoteClicked(self):
-        self.spvcomm.MoveAxisTo("e_note", 0, 0)
+        self.spvcomm.MoveAxisTo("e_note", int(self.textinENotePos.text()), 0)
 
     def ButtonMovePosxClicked(self):
         self.spvcomm.MoveAxisTo("posx_dae", int(self.textinPosxPos.text()), 20)
@@ -350,7 +358,9 @@ class Ui(QtWidgets.QMainWindow):
         for tag in tags:
             if tag["tag"] == 'DatapointsMissing':
                 channel = None
-                if tag["channel"] == settings.SPVChannelNumbers["posx_dae"]:
+                if tag["channel"] == settings.SPVChannelNumbers["e_note"]:
+                    channel = self.channels["e_note"]
+                elif tag["channel"] == settings.SPVChannelNumbers["posx_dae"]:
                     channel = self.channels["posx_dae"]
                 elif tag["channel"] == settings.SPVChannelNumbers["posy_dae"]:
                     channel = self.channels["posy_dae"]

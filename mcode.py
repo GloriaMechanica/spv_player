@@ -68,7 +68,8 @@ class McodeReader:
         for idx,line in enumerate(lines_data):
             if line[0] == "!":
                 # This is a frame point
-                temp = (line[1:]).split(" ")
+                temp = (line[1:]).split()
+
                 if len(temp) < 3:
                     print("Wrong datapoint on line " + str(lines_data_nr[idx]))
                     return None
@@ -91,7 +92,7 @@ class McodeReader:
 
                 # Now work through the buffer of intermediate commands
                 for idx_,element in enumerate(buffer):
-                    parts = element[0].split(" ")
+                    parts = element[0].split()
                     element_time_spec = parts[0]
                     element_channel_spec = parts[1]
                     if element_time_spec.find("+")>=0:
@@ -110,8 +111,29 @@ class McodeReader:
                 buffer = []
             else:
                 buffer.append([line, idx])
+        # add intermediate commands after last point
+        for idx_, element in enumerate(buffer):
+            parts = element[0].split(" ")
+            element_time_spec = parts[0]
+            element_channel_spec = parts[1]
+            if element_time_spec.find("+") >= 0:
+                element_time = last_time + int(element_time_spec)
+            elif element_time_spec.find("-") >= 0:
+                print("negative relative time spec forbidden after last framepoint! Ignoring!")
+            else:
+                element_time = int(time_spec)
+            list_abstime.append({"abstime": element_time, "channel": element_channel_spec, "paramlist": parts[2:]})
+            cmd_list_prep[element[1]]["abstime"] = element_time
+
+
         # Commands could
         list_abstime.sort(key=lambda x: x["abstime"])
+        print("list_abstime:")
+        for le in list_abstime:
+            print(le)
+        print("cmd_list_prep:")
+        for le in cmd_list_prep:
+            print(le)
         return list_abstime, cmd_list_prep, lines_raw
 
     def getLineNumber(self, string_list, string):
@@ -134,7 +156,8 @@ class McodeReader:
 
         for idx,axis in enumerate(axis_buffers):
             if len(axis) is not 0:
-                last_time = -1000 # TODO: do this properly with init!
+                #last_time = -1000 # TODO: do this properly with init!
+                last_time = 0
                 if idx >= settings.SPVMcodeAxisList["g_note"] and idx <= settings.SPVMcodeAxisList["e_note"]:
                     for point in axis:
                         note = machine_handle.convert_note_point(point, self.calibration)

@@ -7,7 +7,7 @@ Created on Mon Nov 23 18:55:51 2020
 """
 import serial
 import serial.tools.list_ports
-
+import channels
 
 import PyQt5.QtCore
 import time
@@ -126,6 +126,7 @@ class SPVUartConnection:
     def PrepareChannelDatapoints(self, channel, number):
         data = bytearray()
         obtained_number = 0
+        print("prepareChannelData channel nr:" + str(channel.getChannelNumber()))
         block = channel.getNextDatapoints(number)
         if block is not None:
             obtained_number = len(block)
@@ -133,7 +134,10 @@ class SPVUartConnection:
             data.extend(len(block).to_bytes(1, 'little'))
             for point in block:
                 data.extend(point["timediff"].to_bytes(4, 'little'))
-                data.extend(point["pos"].to_bytes(4, 'little', signed=True))
+                if self.IsChannelMotorChannel(channel) == True:
+                    data.extend(point["pos"].to_bytes(4, 'little', signed=True))
+                elif self.IsChannelNoteChannel(channel) == True:
+                    data.extend(point["note"].to_bytes(1, 'little', signed=False))
         return [obtained_number, data]
 
     def MoveAxisTo(self, channel_descriptor, pos, speed):
@@ -141,8 +145,12 @@ class SPVUartConnection:
         data = bytearray()
         channel_nr = SPVChannelNumbers[channel_descriptor]
         data.extend(channel_nr.to_bytes(1, "little"))
-        data.extend(pos.to_bytes(2, "little"))
-        data.extend(speed.to_bytes(1, "little"))
+        if channel_nr == SPVChannelNumbers["e_note"]:
+            data.extend(pos.to_bytes(2, "little"))
+            data.extend(speed.to_bytes(1, "little"))
+        else: # for all motor channels. Not quite good exception handling here (none...)
+            data.extend(pos.to_bytes(2, "little"))
+            data.extend(speed.to_bytes(1, "little"))
         self.SPVSendCommand("moveChannelTo", data)
 
     def MoveAxisRelative(self, channel_descriptor, pos_diff, speed):
@@ -220,6 +228,8 @@ class SPVUartConnection:
             tempdata.extend(data)
         crcval = crc16(tempdata, len(tempdata))
         tempdata.extend(crcval.to_bytes(length=2, byteorder='big'))
+        #check_string = ' '.join(format(x, '02X') for x in tempdata)
+        #print(check_string)
         self.serial_con.write(tempdata)
         print("Send: CRC=" + hex(crcval) + " length=" + str(length))
 
@@ -262,6 +272,21 @@ class SPVUartConnection:
         if self.poller is not None:
             self.poller.exit()
         self.poller = None
+
+    def IsChannelMotorChannel(self, channel):
+        if channel.getChannelNumber() == settings.SPVChannelNumbers["posx_dae"]:
+            return True
+        elif channel.getChannelNumber() == settings.SPVChannelNumbers["posy_dae"]:
+            return True
+        elif channel.getChannelNumber() == settings.SPVChannelNumbers["str_dae"]:
+            return True
+        return False
+
+    def IsChannelNoteChannel(self, channel):
+        if channel.getChannelNumber() == settings.SPVChannelNumbers["e_note"]:
+            return True
+        return False
+
 # ----------------------------------------------------------
 
 def GetPorts(): 
