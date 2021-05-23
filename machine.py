@@ -122,6 +122,8 @@ class Machine_SPV:
             input_angle = int(input_point["paramlist"][1])
             radius = input_radius + calibration["nominal_string_radius"]
             angle = input_angle / 180 * np.pi
+            angle_x = 0
+            angle_y = 0
             ret = self.PolarToAngle([radius, angle], calibration)
             if ret is not False:
                 [angle_x, angle_y] = ret

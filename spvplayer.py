@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QFileDialog
 import PyQt5.QtCore
 import numpy as np
 import threading
+import time
 import struct
 
 import sys
@@ -32,6 +33,12 @@ class Ui(QtWidgets.QMainWindow):
     def __initialize(self):
         # M-Code filename
         self.m_code_file_name = ""  # We will get this via OpenFileDialog
+
+        # Command list
+        self.cmd_list = []
+        self.mcode_raw_lines = []
+        self.qTimer = PyQt5.QtCore.QTimer()
+        self.qTimer.timeout.connect(self.RefreshCommandList)
 
         # Settings
         self.settings = settings.Settings()
@@ -84,6 +91,7 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonStopPlaying.clicked.connect(self.ButtonStopPlayingClicked)
         self.buttonClearChannels.clicked.connect(self.ButtonClearChannelsClicked)
         self.buttonReadMcode.clicked.connect(self.ButtonReadMcodeClicked)
+
 
 
         self.buttonGetMachineStatus.clicked.connect(self.ButtonGetMachineStatusClicked)
@@ -181,10 +189,13 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonStartPlayingClicked(self):
         self.spvcomm.SPVSendCommand("startPlaying", None)
+        self.qTimer.setInterval(0)
+        self.qTimer.start()
         print("Start Playing")
 
     def ButtonStopPlayingClicked(self):
         self.spvcomm.SPVSendCommand("stopPlaying", None)
+        self.qTimer.stop()
         print("Stop Playing")
 
     def ButtonReadMcodeClicked(self):
@@ -192,10 +203,16 @@ class Ui(QtWidgets.QMainWindow):
         if not self.m_code_file_name:
             print("E: No M-Code File selected, nothing to read!")
             return
-        data = self.mcreader.parseFile(self.m_code_file_name)
-        if data is None:
+        data, cmd_list, mcode_raw_lines = self.mcreader.parseFile(self.m_code_file_name)
+
+        if data is None or cmd_list is None:
             print("E: Parse error!")
         else:
+            # Generate src_command list for displaying the commands executed
+            self.cmd_list = self.mcreader.cmd_list_generator(cmd_list)
+            self.mcode_raw_lines = mcode_raw_lines
+
+            print(self.cmd_list)
             for d in data:
                 print(d)
             self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
@@ -393,6 +410,19 @@ class Ui(QtWidgets.QMainWindow):
         if self.AutoMachineUpdateRunning == 1:
             self.StartAutoRefreshTimer()
 
+    def RefreshCommandList(self):
+
+        test = list(self.cmd_list)
+        current_time = self.qTimer.interval()
+        for line in self.cmd_list[current_time]:
+            print(self.mcode_raw_lines[line - 1])
+            self.mcodeLog.append(self.mcode_raw_lines[line - 1])
+        try:
+            next_time = test[test.index(current_time) + 1]
+        except (ValueError, IndexError):
+            next_time = 0
+            self.qTimer.stop()
+        self.qTimer.setInterval(next_time)
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()

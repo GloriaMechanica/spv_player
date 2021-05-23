@@ -1,5 +1,6 @@
 import numpy as np
 import settings
+import datetime
 
 class McodeReader:
     def __init__(self, calibration):
@@ -17,6 +18,7 @@ class McodeReader:
         # Preprocessor
         # 1. find symbols
         lines_prep = []
+        cmd_list_prep = []
         lines_prep_nr = []
         found_begin = 0
         for idx,line in enumerate(lines_raw):
@@ -32,8 +34,10 @@ class McodeReader:
                         found_begin = 1
                 elif found_begin==1:
                     lines_prep.append(l)
+                    cmd_list_prep.append({"src_line": idx +1 , "src_cmd": l})
                     lines_prep_nr.append(lines_raw_nr[idx]) # Save line numbers to be able to give error messages
         print(symbol_dict)
+        print(cmd_list_prep)
 
         lines_data = []
         lines_data_nr = []
@@ -42,6 +46,7 @@ class McodeReader:
             temp = line
             for d in symbol_dict:
                 temp = temp.replace(d, str(symbol_dict[d]))
+                cmd_list_prep[idx]["src_cmd"] = temp
             if temp.find("$")>=0:
                 # There are still labels left. This should not be the case
                 bad_key = temp[temp.find("$"):].split(" ")[0]
@@ -51,11 +56,12 @@ class McodeReader:
             else:
                 lines_data.append(temp)
                 lines_data_nr.append(lines_prep[idx])
-
+        print(cmd_list_prep)
         # Main data processing
 
         # Unravelling the time
         buffer = []
+        buffer_ = []
         list_abstime = []
         last_time = 0
         current_time = 0
@@ -84,8 +90,8 @@ class McodeReader:
                     print("Time runs in reverse at line " + str(lines_data_nr[idx]))
 
                 # Now work through the buffer of intermediate commands
-                for element in buffer:
-                    parts = element.split(" ")
+                for idx_,element in enumerate(buffer):
+                    parts = element[0].split(" ")
                     element_time_spec = parts[0]
                     element_channel_spec = parts[1]
                     if element_time_spec.find("+")>=0:
@@ -95,16 +101,18 @@ class McodeReader:
                     else:
                         element_time = int(time_spec)
                     list_abstime.append({"abstime": element_time, "channel": element_channel_spec, "paramlist": parts[2:]})
+                    cmd_list_prep[element[1]]["abstime"] = element_time
 
                 list_abstime.append({"abstime": current_time, "channel": channel_spec, "paramlist": temp[2:]})
+                cmd_list_prep[idx]["abstime"] = current_time
                 # at last, update the time till the next frame point comes
                 last_time = current_time
                 buffer = []
             else:
-                buffer.append(line)
+                buffer.append([line, idx])
         # Commands could
         list_abstime.sort(key=lambda x: x["abstime"])
-        return list_abstime
+        return list_abstime, cmd_list_prep, lines_raw
 
     def getLineNumber(self, string_list, string):
         for idx, line in enumerate(string_list):
@@ -154,3 +162,28 @@ class McodeReader:
                     #TODO: Add more axis here
 
 
+    def cmd_list_generator(self, cmd_list_prep):
+        line_list = {}
+        previous_abstime = -1
+        # Generating a list which defines when a set of lines is shown
+        for element in cmd_list_prep:
+            if previous_abstime != element["abstime"]:
+                line_list[element["abstime"]] = [element["src_line"]]
+                previous_abstime = element["abstime"]
+            else:
+                line_list[previous_abstime].append(element["src_line"])
+
+        # Filling out the missing lines with lines not containing commands
+
+        previous_max_line = 0
+        for key,lines in line_list.items():
+            if previous_max_line < min(lines):
+                for i in range(previous_max_line + 1, min(lines)):
+                    line_list[key].append(i)
+                lines.sort()
+            previous_max_line = max(lines)
+
+        print(line_list)
+
+
+        return line_list
