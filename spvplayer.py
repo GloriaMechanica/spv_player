@@ -39,6 +39,7 @@ class Ui(QtWidgets.QMainWindow):
         self.mcode_raw_lines = []
         self.qTimer = PyQt5.QtCore.QTimer()
         self.qTimer.timeout.connect(self.RefreshCommandList)
+        self.previous_time = 0
 
         # Settings
         self.settings = settings.Settings()
@@ -423,16 +424,17 @@ class Ui(QtWidgets.QMainWindow):
     def RefreshCommandList(self):
 
         test = list(self.cmd_list)
-        current_time = self.qTimer.interval()
+        current_time = self.previous_time
         for line in self.cmd_list[current_time]:
             print(self.mcode_raw_lines[line - 1])
-            self.mcodeLog.append(self.mcode_raw_lines[line - 1])
+            self.mcodeLog.append(self.mcode_raw_lines[line - 1].strip())
         try:
             next_time = test[test.index(current_time) + 1]
+            self.previous_time = next_time
         except (ValueError, IndexError):
             next_time = 0
             self.qTimer.stop()
-        self.qTimer.setInterval(next_time)
+        self.qTimer.setInterval(next_time - current_time)
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()

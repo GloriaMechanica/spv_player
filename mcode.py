@@ -9,6 +9,7 @@ class McodeReader:
     def parseFile(self, path):
         file = open(path, "r")
         lines_raw = file.readlines()
+        lines_raw_ = lines_raw
         symbol_dict = {}
 
         # first kill all commends
@@ -134,7 +135,7 @@ class McodeReader:
         print("cmd_list_prep:")
         for le in cmd_list_prep:
             print(le)
-        return list_abstime, cmd_list_prep, lines_raw
+        return list_abstime, cmd_list_prep, lines_raw_
 
     def getLineNumber(self, string_list, string):
         for idx, line in enumerate(string_list):
