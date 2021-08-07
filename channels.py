@@ -65,6 +65,9 @@ class ChannelStructure:
     def getChannelBuffer(self):
         return self.buffer
 
+    def clearChannelBuffer(self):
+        self.buffer.clear()
+
 # ---------------------------------------------------------------------
 
 def removekey(d, key):

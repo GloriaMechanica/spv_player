@@ -183,7 +183,8 @@ class Ui(QtWidgets.QMainWindow):
         self.channels["str_dae"].resetTimeToStart()
 
     def ButtonInitSPVClicked(self):
-        print("Init not implemented yet!")
+        self.spvcomm.SPVSendCommand("initChannelsToData", None)
+        print("Init channels to data")
 
     def ButtonClearChannelsClicked(self):
         self.spvcomm.SPVSendCommand("clearChannels", None)
@@ -202,6 +203,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def ButtonReadMcodeClicked(self):
 
+        self.previous_time = 0
         if not self.m_code_file_name:
             print("E: No M-Code File selected, nothing to read!")
             return
@@ -218,6 +220,15 @@ class Ui(QtWidgets.QMainWindow):
             print(self.cmd_list)
             for d in data:
                 print(d)
+            self.channels["e_note"].clearChannelBuffer()
+            self.channels["posx_dae"].clearChannelBuffer()
+            self.channels["posy_dae"].clearChannelBuffer()
+            self.channels["str_dae"].clearChannelBuffer()
+            self.channels["e_note"].resetTimeToStart()
+            self.channels["posx_dae"].resetTimeToStart()
+            self.channels["posy_dae"].resetTimeToStart()
+            self.channels["str_dae"].resetTimeToStart()
+
             self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
         print("Status of e_note channel")
         buf = self.channels["e_note"].getChannelBuffer()

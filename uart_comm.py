@@ -213,6 +213,8 @@ class SPVUartConnection:
             cmdbyte = b'\x05'
         elif command == "clearChannels":
             cmdbyte = b'\x06'
+        elif command == 'initChannelsToData':
+            cmdbyte = b'\x07'
         elif command == "moveChannelTo":
             cmdbyte = b'\x09'
         elif command == "moveChannelRelative":

@@ -27,13 +27,13 @@
 !+$T4 e_note B5
 
 -0 str_dae 50
-!+$T2 e_note C6#
+!+$T4 e_note C6#
 
 -0 str_dae 250 // Hier mehr stroke da es sich um eine längere Note handelt
 !+$T2 e_note C6#
 
 -0 str_dae 50
-!+$T4 e_note D6#
+!+$T2 e_note D6#
 
 -0 str_dae 150
 !+$T4 e_note D6#
@@ -45,82 +45,18 @@
 !+$T4 e_note D6#
 
 -0 str_dae 50
-!+$T2 e_note C6#
+!+$T4 e_note C6#
 
 -0 str_dae 250
 -0 pos_dae $DOWN $POSE
 
 !+$T2 e_note E5
 +100 pos_dae $UP $POSE
-+100 str_dae 250
++0 str_dae 250
 
 
--100 str_dae 250
--100 pos_dae $UP $POSE
--0 pos_dae $DOWN $POSE
-!+$T4 e_note D6#
 
--10 str_dae 150
--0 str_dae 150
-!+$T4 e_note D6#
 
--0 str_dae 50
-!+$T4 e_note D6#
-
--0 str_dae 150
-!+$T4 e_note D6#
-
--0 str_dae 50
-!+$T2 e_note C6#
-
--0 str_dae 250
--0 pos_dae $DOWN $POSE
-
-!+$T2 e_note E5
-+100 str_dae 250
-+100 pos_dae $UP $POSE
-
--100 str_dae 250
--100 pos_dae $UP $POSE
--0 pos_dae $DOWN $POSE
-!+$T4 e_note B5
-
--10 str_dae 150
--0 str_dae 150
-!+$T4 e_note B5
-
--0 str_dae 50
-!+$T4 e_note B5
-
--0 str_dae 150
-!+$T4 e_note B5
-
--0 str_dae 50
-!+$T2 e_note A5
-
--0 str_dae 250
-!+$T2 e_note A5
-
--0 str_dae 50
-!+$T4 e_note C6#
-
--0 str_dae 150
-!+$T4 e_note C6#
-
--0 str_dae 50
-!+$T4 e_note C6#
-
--0 str_dae 150
-!+$T4 e_note C6#
-
--0 str_dae 50
-!+$T4 e_note E5
-
--0 str_dae 250
-!+$T2 e_note E5
-+0 pos_dae $DOWN $POSE
-+100 pos_dae $UP $POSE
-+100 str_dae 250
 
 
 
