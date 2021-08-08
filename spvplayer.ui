@@ -347,7 +347,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>10</string>
+       <string>100</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="textinSTRDAEMoveRel">
@@ -360,7 +360,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>10</string>
+       <string>100</string>
       </property>
      </widget>
      <widget class="QPushButton" name="buttonSTRDAEMoveRelNegative">
@@ -425,7 +425,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>10</string>
+       <string>100</string>
       </property>
      </widget>
      <widget class="QPushButton" name="buttonPOSYDAEMoveRelNegative">
@@ -439,6 +439,32 @@
       </property>
       <property name="text">
        <string>-</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="buttonManualx10">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>35</y>
+        <width>56</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>x10</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="buttonManuald10">
+      <property name="geometry">
+       <rect>
+        <x>75</x>
+        <y>35</y>
+        <width>56</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>/10</string>
       </property>
      </widget>
     </widget>
@@ -851,7 +877,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>5</string>
+       <string>50</string>
       </property>
      </widget>
      <widget class="QPushButton" name="ButtonMoveStrAxis">
@@ -1059,8 +1085,8 @@
        <height>250</height>
       </rect>
      </property>
-     <property name="text">
-      <string></string>
+     <property name="text" stdset="0">
+      <string/>
      </property>
     </widget>
    </widget>
@@ -1409,12 +1435,12 @@
       <rect>
        <x>15</x>
        <y>55</y>
-       <width>181</width>
+       <width>126</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>Reference limit switches</string>
+      <string>Reference limits</string>
      </property>
     </widget>
     <widget class="QPushButton" name="buttonCalculateCal">
@@ -1428,6 +1454,54 @@
      </property>
      <property name="text">
       <string>Calculate Calibration</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbCalPosX">
+     <property name="geometry">
+      <rect>
+       <x>145</x>
+       <y>55</y>
+       <width>51</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>posx</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbCalPosY">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>55</y>
+       <width>51</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>posy</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbCalStr">
+     <property name="geometry">
+      <rect>
+       <x>255</x>
+       <y>55</y>
+       <width>51</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>str</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

@@ -110,6 +110,8 @@ class Ui(QtWidgets.QMainWindow):
         self.buttonPOSXDAEMoveRelNegative.clicked.connect(self.ButtonMovePosxRelMinusClicked)
         self.buttonPOSYDAEMoveRelNegative.clicked.connect(self.ButtonMovePosyRelMinusClicked)
         self.buttonSTRDAEMoveRelNegative.clicked.connect(self.ButtonMoveStrRelMinusClicked)
+        self.buttonManualx10.clicked.connect(self.ButtonManualx10)
+        self.buttonManuald10.clicked.connect(self.ButtonManuald10)
         self.ButtonMovePosLevers.clicked.connect(self.ButtonMovePosLeversClicked)
         self.ButtonMoveStrAxis.clicked.connect(self.ButtonMoveStrAxisClicked)
         self.ButtonPredefinedPositionE.clicked.connect(self.ButtonPredefinedPositionEClicked)
@@ -230,6 +232,7 @@ class Ui(QtWidgets.QMainWindow):
             self.channels["str_dae"].resetTimeToStart()
 
             self.mcreader.pushMcodeDataToChannels(data, self.channels, self.machine)
+            self.mcreader.plot_channel_business(self.channels)
         print("Status of e_note channel")
         buf = self.channels["e_note"].getChannelBuffer()
         for b in buf:
@@ -283,11 +286,35 @@ class Ui(QtWidgets.QMainWindow):
     def ButtonMoveStrRelMinusClicked(self):
         self.spvcomm.MoveAxisRelative("str_dae", -int(self.textinSTRDAEMoveRel.text()), 20)
 
+    def ButtonManualx10(self):
+        x = int(self.textinPOSXDAEMoveRel.text())
+        y = int(self.textinPOSYDAEMoveRel.text())
+        z = int(self.textinSTRDAEMoveRel.text())
+        x = int(x * 10)
+        y = int(y * 10)
+        z = int(z * 10)
+        self.textinPOSXDAEMoveRel.setText(str(x))
+        self.textinPOSYDAEMoveRel.setText(str(y))
+        self.textinSTRDAEMoveRel.setText(str(z))
+
+    def ButtonManuald10(self):
+        x = int(self.textinPOSXDAEMoveRel.text())
+        y = int(self.textinPOSYDAEMoveRel.text())
+        z = int(self.textinSTRDAEMoveRel.text())
+        x = int(x / 10)
+        y = int(y / 10)
+        z = int(z / 10)
+        self.textinPOSXDAEMoveRel.setText(str(x))
+        self.textinPOSYDAEMoveRel.setText(str(y))
+        self.textinSTRDAEMoveRel.setText(str(z))
+
     def ButtonReferenceAxisClicked(self):
-        self.spvcomm.ReferenceAxis("posx_dae", 5)
-        self.spvcomm.ReferenceAxis("posy_dae", 5)
-        self.spvcomm.ReferenceAxis("str_dae", 5)
-        #For test only reference x axis
+        if self.cbCalPosX.isChecked() == True:
+            self.spvcomm.ReferenceAxis("posx_dae", 5)
+        if self.cbCalPosY.isChecked() == True:
+            self.spvcomm.ReferenceAxis("posy_dae", 5)
+        if self.cbCalStr.isChecked() == True:
+            self.spvcomm.ReferenceAxis("str_dae", 5)
 
     def ButtonMovePosLeversClicked(self):
         r = float(self.textinManualMoveR.text())
@@ -433,7 +460,7 @@ class Ui(QtWidgets.QMainWindow):
             self.StartAutoRefreshTimer()
 
     def RefreshCommandList(self):
-
+        return #killed this  because it was crashing the application
         test = list(self.cmd_list)
         current_time = self.previous_time
         for line in self.cmd_list[current_time]:

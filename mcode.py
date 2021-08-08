@@ -1,5 +1,6 @@
 import numpy as np
 import settings
+import matplotlib.pyplot as plt
 import datetime
 
 class McodeReader:
@@ -209,5 +210,62 @@ class McodeReader:
 
         print(line_list)
 
+    def plot_channel_business(self, channel_handle):
+        print("start plotting timeline")
 
-        return line_list
+        fig, ax = plt.subplots(2,1)
+        length_time = 0
+        ctr = 0
+        buf = channel_handle["e_note"].getChannelBuffer()
+        if not len(buf) == 0:
+            ax[0].axvline(buf[0]["timediff"], 0, 0.25, color="red", label="e_note")
+        for point in buf:
+            ctr = ctr + int(point["timediff"])
+            ax[0].axvline(int(point["timestamp"]), 0, 0.25, color="red")
+            ax[0].text(ctr+10, 0.02, str(settings.SPVNoteRangeLookup[point["note"]]))
+        length_time = max(length_time, ctr)
+
+        ctr = 0
+        buf = channel_handle["posx_dae"].getChannelBuffer()
+        if not len(buf) == 0:
+            ax[0].axvline(buf[0]["timediff"], 0.25, 0.5, color="lightgreen", label="posx_dae")
+        for point in buf:
+            ctr = ctr + int(point["timediff"])
+            ax[0].axvline(ctr, 0.25, 0.5, color="lightgreen")
+        length_time = max(length_time, ctr)
+
+        ctr = 0
+        buf = channel_handle["posy_dae"].getChannelBuffer()
+        if not len(buf) == 0:
+            ax[0].axvline(buf[0]["timediff"], 0.5, 0.75, color="green", label="posy_dae")
+        for point in buf:
+            ctr = ctr + int(point["timediff"])
+            ax[0].axvline(ctr, 0.5, 0.75, color="green")
+        length_time = max(length_time, ctr)
+
+        str_times = []
+        str_positions = []
+        ctr = 0
+        buf = channel_handle["str_dae"].getChannelBuffer()
+        if not len(buf) == 0:
+            ax[0].axvline(buf[0]["timediff"], 0.75, 1, color="blue", label="str_dae")
+        for point in buf:
+            ctr = ctr + int(point["timediff"])
+            str_times.append(ctr)
+            ax[0].axvline(ctr, 0.75, 1, color="blue")
+            str_positions.append(int(point["pos"]))
+        length_time = max(length_time, ctr)
+
+        width = int(length_time) / 20 # autoscaling width for good readability
+        height = 100
+
+        ax[0].grid(True, linestyle='--')
+        ax[0].set_xlabel("time (ms)")
+        ax[0].legend(loc='upper center', bbox_to_anchor=(1.05, 0.7))
+        ax[0].set_xlim(-10, length_time)
+        ax[1].plot(str_times, str_positions, color="blue", label="str_dae")
+        ax[1].set_xlim(-10, length_time)
+        ax[1].grid(True, linestyle='--')
+
+        fig.set_size_inches(width / 25.4, height / 25.4)
+        fig.savefig("timeline.pdf", format="pdf", bbox_inches="tight")
